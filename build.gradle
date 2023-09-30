@@ -1,0 +1,54 @@
+buildscript {
+  repositories {
+    mavenCentral()
+    maven { url 'https://s01.oss.sonatype.org' }
+    mavenLocal()
+    google()
+    gradlePluginPortal()
+    maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
+    maven { url 'https://s01.oss.sonatype.org/content/repositories/snapshots/' }
+  }
+  dependencies {
+    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
+
+  }
+}
+
+allprojects {
+  apply plugin: 'eclipse'
+  apply plugin: 'idea'
+}
+
+configure(subprojects) {
+  apply plugin: 'java-library'
+  apply plugin: 'kotlin'
+  sourceCompatibility = 11
+  compileJava {
+    options.incremental = true
+  }
+  compileKotlin {
+    compilerOptions.jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
+  }
+
+  kotlin {
+    jvmToolchain(11)
+  }
+}
+
+subprojects {
+  version = '1.0.0'
+  ext.appName = 'quilly-crawler'
+  repositories {
+    mavenCentral()
+    maven { url 'https://s01.oss.sonatype.org' }
+    // You may want to remove the following line if you have errors downloading dependencies.
+    mavenLocal()
+    gradlePluginPortal()
+    maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
+    maven { url 'https://s01.oss.sonatype.org/content/repositories/snapshots/' }
+    maven { url 'https://jitpack.io' }
+    maven { url 'https://teavm.org/maven/repository/' }
+  }
+}
+
+eclipse.project.name = 'quilly-crawler' + '-parent'
