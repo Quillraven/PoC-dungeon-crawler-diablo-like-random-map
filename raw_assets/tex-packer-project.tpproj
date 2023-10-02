@@ -2,7 +2,7 @@ name=characters
 filename=
 output=../assets/graphics
 
-alias=true
+alias=false
 alphaThreshold=0
 debug=false
 duplicatePadding=false
@@ -16,7 +16,7 @@ maxWidth=2048
 minHeight=16
 minWidth=16
 paddingX=4
-paddingY=2
+paddingY=4
 pot=true
 mof=false
 rotation=false
@@ -35,6 +35,48 @@ legacyOutput=false
 
 scaleFactors=[{suffix:"",factor:1,resampling:bicubic}]
 inputFiles=[{path:characters,type:Input,dirFilePrefix:null,recursive:true,flattenPaths:false}]
+keepInputFileExtensions=false
+
+
+---
+
+name=props
+filename=
+output=../assets/graphics
+
+alias=false
+alphaThreshold=0
+debug=false
+duplicatePadding=false
+edgePadding=true
+fast=false
+filterMag=Nearest
+filterMin=Nearest
+ignoreBlankImages=true
+maxHeight=2048
+maxWidth=2048
+minHeight=16
+minWidth=16
+paddingX=4
+paddingY=4
+pot=true
+mof=false
+rotation=false
+stripWhitespaceX=false
+stripWhitespaceY=false
+wrapX=ClampToEdge
+wrapY=ClampToEdge
+premultiplyAlpha=false
+grid=true
+square=false
+bleed=true
+limitMemory=true
+useIndexes=true
+prettyPrint=false
+legacyOutput=false
+
+scaleFactors=[{suffix:"",factor:1,resampling:bicubic}]
+inputFiles=[{path:props,type:Input,dirFilePrefix:null,recursive:true,flattenPaths:false}]
 keepInputFileExtensions=false
 
 
