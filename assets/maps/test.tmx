@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.8" tiledversion="1.8.0" orientation="orthogonal" renderorder="right-down" width="3" height="3" tilewidth="16" tileheight="16" infinite="0" nextlayerid="6" nextobjectid="14">
+ <tileset firstgid="1" source="dungeon.tsx"/>
+ <tileset firstgid="101" source="props.tsx"/>
+ <tileset firstgid="113" source="characters.tsx"/>
+ <layer id="1" name="bgd" width="3" height="3">
+  <data encoding="base64" compression="zlib">
+   eJxjZmBgCABiVigNw2ZQ2hiIASOwAgI=
+  </data>
+ </layer>
+ <layer id="4" name="bgd2" width="3" height="3">
+  <data encoding="base64" compression="zlib">
+   eJxjYCAMAAAkAAE=
+  </data>
+ </layer>
+ <objectgroup color="#ff0000" id="5" name="connections">
+  <object id="10" x="32" y="16" width="16" height="16"/>
+  <object id="11" x="16" y="0" width="16" height="16"/>
+  <object id="12" x="0" y="16" width="16" height="16"/>
+  <object id="13" x="16" y="32" width="16" height="16"/>
+ </objectgroup>
+ <objectgroup id="2" name="characters">
+  <object id="9" gid="115" x="16" y="32" width="16" height="16"/>
+ </objectgroup>
+ <objectgroup id="3" name="props"/>
+</map>

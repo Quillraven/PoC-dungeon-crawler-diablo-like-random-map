@@ -5,7 +5,7 @@
  <tileset firstgid="113" source="characters.tsx"/>
  <layer id="1" name="bgd" width="10" height="10">
   <data encoding="base64" compression="zlib">
-   eJxt0DkPgkAQhuHF29BokEgQj4LGiwZjB9ix2vj//43vJJ/Jxlg8xUxm59jIOTfAECOM/8QTpFihxQZbdFjDK7fAHjPVzdHjgQRL1eU44oY7nqiDuFeuxFts/lRvv/FOM2xuFOztg71jZNopV2y9G7xQ6H2s2Ha8qH+jvdtgdqpcorvs3oNmFPqXUnmvmlr3nnBW/yuqn7zFH3JbDSs=
+   eJxd0LkOwjAQRVGHsASlITIWKISlcMOWBkTH0sXQ8P9/w7X0IlkUp3gj2zPjzBgzQI4XRkkeKo/hMMcDK6zxxAJBtRm2KHRuik7vWlQ6V2OPK25445LkTjWPr8T+E93t80Y9Yt8smTskc5dYaqZaOb59xweN7pfKlfo6nbHape/tVLPKcd+dejT6F6960O5e+x5wxAlntH/1mH+6Xw0q
   </data>
  </layer>
  <layer id="4" name="bgd2" width="10" height="10">
@@ -14,11 +14,11 @@
   </data>
  </layer>
  <objectgroup color="#ff0000" id="5" name="connections">
-  <object id="10" x="144" y="112" width="16" height="16"/>
+  <object id="10" x="48" y="0" width="16" height="16"/>
  </objectgroup>
  <objectgroup id="2" name="characters">
   <object id="8" gid="113" x="80" y="48" width="16" height="16"/>
-  <object id="9" gid="115" x="112" y="128" width="16" height="16"/>
+  <object id="9" gid="115" x="48" y="48" width="16" height="16"/>
  </objectgroup>
  <objectgroup id="3" name="props">
   <object id="2" gid="102" x="32" y="16" width="16" height="16"/>

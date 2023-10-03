@@ -30,5 +30,7 @@ data class Boundary(
         }
     }
 
+    fun center(to: Vector2): Vector2 = to.set(position.x + size.x * 0.5f, position.y + size.y * 0.5f)
+
     companion object : ComponentType<Boundary>()
 }
