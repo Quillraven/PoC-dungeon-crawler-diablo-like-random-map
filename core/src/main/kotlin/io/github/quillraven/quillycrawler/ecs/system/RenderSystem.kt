@@ -36,7 +36,6 @@ class RenderSystem(private val batch: Batch = inject(), private val viewport: Vi
     private var doTransition = false
     private var transitionInterpolation = Interpolation.linear
     private var transitionAlpha = 0f
-    private var transitionSpeed = 1f
     private val transitionMapRenderer = OrthogonalTiledMapRenderer(null, UNIT_SCALE, batch)
     private val transitionFrom = vec2()
     private val transitionTo = vec2()
@@ -46,7 +45,7 @@ class RenderSystem(private val batch: Batch = inject(), private val viewport: Vi
         viewport.apply()
 
         if (doTransition) {
-            transitionAlpha = (transitionAlpha + deltaTime * transitionSpeed).coerceAtMost(1f)
+            transitionAlpha = (transitionAlpha + deltaTime * TRANSITION_SPEED).coerceAtMost(1f)
 
             orthoCamera.position.x = transitionInterpolation.apply(transitionFrom.x, transitionTo.x, transitionAlpha)
             orthoCamera.position.y = transitionInterpolation.apply(transitionFrom.y, transitionTo.y, transitionAlpha)
@@ -123,7 +122,6 @@ class RenderSystem(private val batch: Batch = inject(), private val viewport: Vi
 
         doTransition = true
         transitionAlpha = 0f
-        transitionSpeed = 0.8f
         transitionInterpolation = Interpolation.fade
 
         transitionFrom.set(camX, camY)
@@ -168,4 +166,8 @@ class RenderSystem(private val batch: Batch = inject(), private val viewport: Vi
     private operator fun OrthographicCamera.component3() = this.viewportWidth
 
     private operator fun OrthographicCamera.component4() = this.viewportHeight
+
+    companion object {
+        const val TRANSITION_SPEED = 0.8f
+    }
 }

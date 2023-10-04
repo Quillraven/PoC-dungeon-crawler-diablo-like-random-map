@@ -9,13 +9,13 @@ import io.github.quillraven.quillycrawler.ecs.component.Graphic
 class FadeSystem : IteratingSystem(family { all(Fade, Graphic) }) {
     override fun onTickEntity(entity: Entity) {
         val fadeCmp = entity[Fade]
-        val (interpolation, speed, alpha) = fadeCmp
+        val (interpolation, speed, from, to, alpha) = fadeCmp
         if (alpha >= 1f) {
             entity.configure { it -= Fade }
         }
 
         val (sprite) = entity[Graphic]
-        sprite.setAlpha(interpolation.apply(0f, 1f, alpha))
+        sprite.setAlpha(interpolation.apply(from, to, alpha))
         fadeCmp.alpha = (alpha + deltaTime * speed).coerceAtMost(1f)
     }
 }

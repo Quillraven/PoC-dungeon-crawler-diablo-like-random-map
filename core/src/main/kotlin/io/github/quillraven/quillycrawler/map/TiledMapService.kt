@@ -13,11 +13,9 @@ import io.github.quillraven.quillycrawler.assets.TiledMapAssets
 import io.github.quillraven.quillycrawler.ecs.CharacterType
 import io.github.quillraven.quillycrawler.ecs.PropType
 import io.github.quillraven.quillycrawler.ecs.character
-import io.github.quillraven.quillycrawler.ecs.component.Boundary
-import io.github.quillraven.quillycrawler.ecs.component.Fade
-import io.github.quillraven.quillycrawler.ecs.component.Tags
-import io.github.quillraven.quillycrawler.ecs.component.Tiled
+import io.github.quillraven.quillycrawler.ecs.component.*
 import io.github.quillraven.quillycrawler.ecs.prop
+import io.github.quillraven.quillycrawler.ecs.system.RenderSystem.Companion.TRANSITION_SPEED
 import io.github.quillraven.quillycrawler.event.*
 import ktx.app.gdxError
 import ktx.math.vec2
@@ -58,6 +56,7 @@ class TiledMapService(private val world: World, private val assets: Assets) : Ev
             world.character(CharacterType.valueOf(tileType.uppercase()), mapObject.scaledPosition) {
                 it += Tiled(mapObject)
                 if (fadeIn) {
+                    it[Graphic].sprite.setAlpha(0f)
                     it += Fade(Interpolation.fade, 0.75f)
                 }
             }
@@ -71,6 +70,7 @@ class TiledMapService(private val world: World, private val assets: Assets) : Ev
             world.prop(PropType.valueOf(tileType.uppercase()), mapObject.scaledPosition) {
                 it += Tiled(mapObject)
                 if (fadeIn) {
+                    it[Graphic].sprite.setAlpha(0f)
                     it += Fade(Interpolation.fade, 0.75f)
                 }
             }
@@ -95,6 +95,13 @@ class TiledMapService(private val world: World, private val assets: Assets) : Ev
         when (event) {
             is MapConnectionEvent -> {
                 lastConnection = activeMap.connect(event.connection, allMaps)
+                // fade out current characters/props together with the current map.
+                // Map fade out is happening in RenderSystem.
+                // The characters/props get removed in the MapTransitionStopEvent below.
+                tiledEntities.forEach { tiledEntity ->
+                    tiledEntity.configure { it += Fade(Interpolation.fade, TRANSITION_SPEED, 1f, 0f) }
+                }
+
             }
 
             is MapTransitionStartEvent -> nextMap = event.toMap

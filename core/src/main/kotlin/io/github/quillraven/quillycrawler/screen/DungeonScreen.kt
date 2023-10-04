@@ -38,7 +38,7 @@ class DungeonScreen(private val assets: Assets, private val batch: Batch) : KtxS
     override fun show() {
         world.activateKeyboardController()
         world.registerEventListener()
-        tiledMapService.loadMap(TiledMapAssets.TEST)
+        tiledMapService.loadMap(TiledMapAssets.START_0)
     }
 
     override fun hide() {
