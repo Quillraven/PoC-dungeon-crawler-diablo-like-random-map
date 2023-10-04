@@ -18,10 +18,7 @@ import ktx.math.component1
 import ktx.math.component2
 import ktx.math.div
 import ktx.math.vec2
-import ktx.tiled.forEachLayer
-import ktx.tiled.id
-import ktx.tiled.property
-import ktx.tiled.shape
+import ktx.tiled.*
 
 class MoveSystem : IteratingSystem(family { all(Move, Boundary) }), EventListener {
 
@@ -40,6 +37,11 @@ class MoveSystem : IteratingSystem(family { all(Move, Boundary) }), EventListene
             0f -> updateTarget(entity, boundaryCmp, from, to, direction)
             1f -> {
                 // target reached
+                if (entity has Tags.ROOT) {
+                    // ... entity is rooted -> lock it in place
+                    return
+                }
+
                 moveCmp.alpha = 0f
                 if (direction == MoveDirection.NONE) {
                     // ... and no more direction to go
@@ -88,16 +90,24 @@ class MoveSystem : IteratingSystem(family { all(Move, Boundary) }), EventListene
         }
 
         if (entity has Tags.PLAYER) {
-            checkPlayerMovement(entity, boundary)
+            checkPlayerMovement(entity, boundary, to)
         }
     }
 
-    private fun checkPlayerMovement(entity: Entity, boundary: Boundary) {
+    private fun checkPlayerMovement(entity: Entity, boundary: Boundary, to: Vector2) {
         val scaledPlayerCenter = boundary.center(TMP_CENTER).div(UNIT_SCALE)
+        val mapWidth = currentMap?.tiledMap?.width?.toFloat() ?: 0f
+        val mapHeight = currentMap?.tiledMap?.height?.toFloat() ?: 0f
+        if (to.x in 0f..<mapWidth && to.y in 0f..<mapHeight) {
+            // player is not leaving map
+            return
+        }
+
         currentMap?.connections
             ?.firstOrNull { scaledPlayerCenter in it.shape }
             ?.let { connection ->
                 LOG.debug { "Player is leaving connection ${connection.id}" }
+                entity.configure { it += Tags.ROOT }
                 EventDispatcher.dispatch(MapConnectionEvent(entity, connection))
             }
     }

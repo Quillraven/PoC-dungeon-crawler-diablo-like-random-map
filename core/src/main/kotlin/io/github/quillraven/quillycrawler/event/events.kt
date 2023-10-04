@@ -1,7 +1,6 @@
 package io.github.quillraven.quillycrawler.event
 
 import com.badlogic.gdx.maps.MapObject
-import com.badlogic.gdx.math.Vector2
 import com.github.quillraven.fleks.Entity
 import io.github.quillraven.quillycrawler.map.ConnectionType
 import io.github.quillraven.quillycrawler.map.DungeonMap
@@ -23,7 +22,7 @@ data class MapTransitionStartEvent(
     val toConnection: MapObject
 ) : Event
 
-data class MapTransitionStopEvent(val offset: Vector2) : Event
+data object MapTransitionStopEvent : Event
 
 data object EventDispatcher {
     private val listeners = mutableListOf<EventListener>()

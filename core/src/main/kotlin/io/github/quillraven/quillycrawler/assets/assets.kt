@@ -14,15 +14,14 @@ enum class TextureAtlasAssets(val path: String) {
     PROPS("graphics/props.atlas"),
 }
 
-// TODO how can we keep TEST asset as well instead of commenting in/out
 enum class TiledMapAssets(val path: String) {
     START_0("maps/start_0.tmx"),
     START_1("maps/start_1.tmx"),
     EXIT_0("maps/exit_0.tmx"),
-    EXIT_1("maps/exit_1.tmx");
-    //TEST("maps/test.tmx");
+    EXIT_1("maps/exit_1.tmx"),
+    TEST("maps/test.tmx");
 
-    fun isStartMap(): Boolean = /*this == TEST ||*/ this.name.contains("start", ignoreCase = true)
+    fun isStartMap(): Boolean = this == TEST || this.name.contains("start", ignoreCase = true)
 }
 
 class Assets {

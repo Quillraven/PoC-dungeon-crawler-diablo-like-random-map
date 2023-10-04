@@ -10,6 +10,7 @@ import io.github.quillraven.quillycrawler.ecs.activateKeyboardController
 import io.github.quillraven.quillycrawler.ecs.deRegisterEventListener
 import io.github.quillraven.quillycrawler.ecs.registerEventListener
 import io.github.quillraven.quillycrawler.ecs.system.AnimationSystem
+import io.github.quillraven.quillycrawler.ecs.system.FadeSystem
 import io.github.quillraven.quillycrawler.ecs.system.MoveSystem
 import io.github.quillraven.quillycrawler.ecs.system.RenderSystem
 import io.github.quillraven.quillycrawler.map.TiledMapService
@@ -28,6 +29,7 @@ class DungeonScreen(private val assets: Assets, private val batch: Batch) : KtxS
         systems {
             add(MoveSystem())
             add(AnimationSystem())
+            add(FadeSystem())
             add(RenderSystem())
         }
     }
@@ -36,7 +38,7 @@ class DungeonScreen(private val assets: Assets, private val batch: Batch) : KtxS
     override fun show() {
         world.activateKeyboardController()
         world.registerEventListener()
-        tiledMapService.loadMap(TiledMapAssets.START_1)
+        tiledMapService.loadMap(TiledMapAssets.TEST)
     }
 
     override fun hide() {

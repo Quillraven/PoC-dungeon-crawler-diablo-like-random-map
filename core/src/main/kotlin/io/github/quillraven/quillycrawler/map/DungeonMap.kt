@@ -23,29 +23,55 @@ enum class ConnectionType {
     }
 }
 
-class DungeonMap(val tiledMap: TiledMap) {
+data class DungeonMap(val assetType: TiledMapAssets, val tiledMap: TiledMap) {
 
     private val toMapConnections = mutableMapOf<MapObject, DungeonMap>()
     val connections: MapObjects = tiledMap.layer("connections").objects
 
-    fun connect(connection: MapObject, allMaps: Map<TiledMapAssets, DungeonMap>) {
-        val type = connectionType(connection)
-        lateinit var targetConnection: MapObject
-        val potentialMaps = allMaps.filter { mapEntry ->
-            val matchingConnection = mapEntry.value.connections.firstOrNull { connectionType(it).oppositeOf(type) }
-            if (matchingConnection != null) {
-                targetConnection = matchingConnection
-            }
-            mapEntry.value != this && matchingConnection != null
+    fun connect(connectionMapObj: MapObject, allMaps: List<DungeonMap>): MapObject {
+        val type = connectionType(connectionMapObj)
+        val toMap = toMapConnections[connectionMapObj]
+        if (toMap != null) {
+            // connection already linked to a map
+            LOG.debug { "Reusing previous connection" }
+            val toMapConnectionMapObj = toMap.connections.firstOrNull { connectionType(it).oppositeOf(type) }
+                ?: gdxError("Map $toMap is not linked to $this map.")
+            EventDispatcher.dispatch(MapTransitionStartEvent(toMap, type, connectionMapObj, toMapConnectionMapObj))
+            return toMapConnectionMapObj
         }
 
-        LOG.debug { "Connecting with type $type to ${potentialMaps.size} potential map(s)" }
-        val nextMap = potentialMaps.entries.randomOrNull() ?: gdxError("No connecting map for type $type")
-        toMapConnections[connection] = nextMap.value
-        nextMap.value.toMapConnections[targetConnection] = this
-        LOG.debug { "Next map is ${nextMap.key}" }
+        // make connection to a random new map
+        lateinit var nextMapConnectionMapObj: MapObject
+        val potentialMaps = when (assetType) {
+            TiledMapAssets.TEST -> {
+                this.connections.firstOrNull { connectionType(it).oppositeOf(type) }?.let { mapObj ->
+                    nextMapConnectionMapObj = mapObj
+                }
+                listOf(this)
+            }
 
-        EventDispatcher.dispatch(MapTransitionStartEvent(nextMap.value, type, connection, targetConnection))
+            else -> {
+                allMaps.filter { map ->
+                    if (map.assetType == TiledMapAssets.TEST) return@filter false
+
+                    val matchingConnection = map.connections.firstOrNull { connectionType(it).oppositeOf(type) }
+                    if (matchingConnection != null) {
+                        nextMapConnectionMapObj = matchingConnection
+                    }
+                    map != this && matchingConnection != null
+                }
+            }
+        }
+
+        // connect this map to a random other map and
+        // connect the random other map to this map
+        val nextMap = potentialMaps.randomOrNull() ?: gdxError("No connecting map for type $type")
+        toMapConnections[connectionMapObj] = nextMap
+        nextMap.toMapConnections[nextMapConnectionMapObj] = this
+        LOG.debug { "Connecting with type $type to ${potentialMaps.size} potential map(s) -> Found: ${nextMap.assetType}" }
+
+        EventDispatcher.dispatch(MapTransitionStartEvent(nextMap, type, connectionMapObj, nextMapConnectionMapObj))
+        return nextMapConnectionMapObj
     }
 
     private fun connectionType(connection: MapObject): ConnectionType {
