@@ -43,7 +43,7 @@ data class DungeonMap(val assetType: TiledMapAssets, val tiledMap: TiledMap) {
         // make connection to a random new map
         lateinit var nextMapConnectionMapObj: MapObject
         val potentialMaps = when (assetType) {
-            TiledMapAssets.TEST -> {
+            TiledMapAssets.TEST, TiledMapAssets.TEST2 -> {
                 this.connections.firstOrNull { connectionType(it).oppositeOf(type) }?.let { mapObj ->
                     nextMapConnectionMapObj = mapObj
                 }
@@ -52,7 +52,7 @@ data class DungeonMap(val assetType: TiledMapAssets, val tiledMap: TiledMap) {
 
             else -> {
                 allMaps.filter { map ->
-                    if (map.assetType == TiledMapAssets.TEST) return@filter false
+                    if (map.assetType == TiledMapAssets.TEST || map.assetType == TiledMapAssets.TEST2) return@filter false
 
                     val matchingConnection = map.connections.firstOrNull { connectionType(it).oppositeOf(type) }
                     if (matchingConnection != null) {

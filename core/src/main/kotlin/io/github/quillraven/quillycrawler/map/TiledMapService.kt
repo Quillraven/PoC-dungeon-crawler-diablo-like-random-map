@@ -83,7 +83,10 @@ class TiledMapService(private val world: World, private val assets: Assets) : Ev
 
             if (playerEntities.isEmpty) {
                 // spawn new player
-                world.character(CharacterType.PRIEST, mapObject.scaledPosition) { it += Tags.PLAYER }
+                world.character(CharacterType.PRIEST, mapObject.scaledPosition) {
+                    it += Tags.PLAYER
+                    it += Tags.CAMERA_LOCK
+                }
             } else {
                 // relocate player
                 playerEntities.forEach { it[Boundary].position.set(mapObject.scaledPosition) }
@@ -113,10 +116,9 @@ class TiledMapService(private val world: World, private val assets: Assets) : Ev
                 val playerTargetPos = lastConnection.scaledPosition
                 playerEntities.forEach { player ->
                     player[Boundary].position.set(playerTargetPos)
-                    player.configure { it -= Tags.ROOT }
                 }
 
-                // TODO remember which entities are still alive -> maybe store them directly in DungeonMap instance ???
+                // TODO remember which entities are still alive -> store them directly in DungeonMap instance
                 tiledEntities.forEach { it.remove() }
                 activeMap = nextMap
                 // TODO either load entire map or state of DungeonMap

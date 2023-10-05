@@ -1,5 +1,6 @@
 package io.github.quillraven.quillycrawler.screen
 
+import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.utils.viewport.ExtendViewport
 import com.badlogic.gdx.utils.viewport.Viewport
@@ -9,19 +10,17 @@ import io.github.quillraven.quillycrawler.assets.TiledMapAssets
 import io.github.quillraven.quillycrawler.ecs.activateKeyboardController
 import io.github.quillraven.quillycrawler.ecs.deRegisterEventListener
 import io.github.quillraven.quillycrawler.ecs.registerEventListener
-import io.github.quillraven.quillycrawler.ecs.system.AnimationSystem
-import io.github.quillraven.quillycrawler.ecs.system.FadeSystem
-import io.github.quillraven.quillycrawler.ecs.system.MoveSystem
-import io.github.quillraven.quillycrawler.ecs.system.RenderSystem
+import io.github.quillraven.quillycrawler.ecs.system.*
 import io.github.quillraven.quillycrawler.map.TiledMapService
 import ktx.app.KtxScreen
 
 class DungeonScreen(private val assets: Assets, private val batch: Batch) : KtxScreen {
 
-    private val viewport: Viewport = ExtendViewport(16f, 9f)
+    private val viewport: Viewport = ExtendViewport(8f, 4.5f)
     private val world = configureWorld {
         injectables {
             add(viewport)
+            add(viewport.camera as OrthographicCamera)
             add(batch)
             add(assets)
         }
@@ -30,6 +29,7 @@ class DungeonScreen(private val assets: Assets, private val batch: Batch) : KtxS
             add(MoveSystem())
             add(AnimationSystem())
             add(FadeSystem())
+            add(CameraSystem())
             add(RenderSystem())
         }
     }

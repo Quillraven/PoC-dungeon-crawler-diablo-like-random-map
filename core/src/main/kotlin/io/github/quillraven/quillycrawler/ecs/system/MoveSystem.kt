@@ -23,6 +23,7 @@ import ktx.tiled.*
 class MoveSystem : IteratingSystem(family { all(Move, Boundary) }), EventListener {
 
     private var currentMap: DungeonMap? = null
+    private val playerEntities = world.family { all(Tags.PLAYER) }
 
     override fun onTickEntity(entity: Entity) {
         val moveCmp = entity[Move]
@@ -107,14 +108,21 @@ class MoveSystem : IteratingSystem(family { all(Move, Boundary) }), EventListene
             ?.firstOrNull { scaledPlayerCenter in it.shape }
             ?.let { connection ->
                 LOG.debug { "Player is leaving connection ${connection.id}" }
-                entity.configure { it += Tags.ROOT }
                 EventDispatcher.dispatch(MapConnectionEvent(entity, connection))
             }
     }
 
     override fun onEvent(event: Event) {
-        if (event is MapLoadEvent) {
-            currentMap = event.dungeonMap
+        when (event) {
+            is MapLoadEvent -> {
+                currentMap = event.dungeonMap
+            }
+
+            is MapTransitionStartEvent -> playerEntities.forEach { player -> player.configure { it += Tags.ROOT } }
+
+            is MapTransitionStopEvent -> playerEntities.forEach { player -> player.configure { it -= Tags.ROOT } }
+
+            else -> Unit
         }
     }
 

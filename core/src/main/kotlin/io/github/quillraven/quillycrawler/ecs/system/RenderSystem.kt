@@ -74,20 +74,22 @@ class RenderSystem(private val batch: Batch = inject(), private val viewport: Vi
             doTransition = transitionAlpha < 1f
             if (!doTransition) {
                 // transition ended -> change to new active map for rendering
-                val (_, _, camW, camH) = orthoCamera
-                orthoCamera.update { position.set(camW * 0.5f, camH * 0.5f, 0f) }
                 mapRenderer.map = transitionMapRenderer.map
                 transitionMapRenderer.map = null
+                // MapTransitionStopEvent is relocating the player's position relative to the new map's boundaries.
+                // Therefore, we need to render the entities before triggering the event to avoid some flickering.
+                // In the next frame, entity positions are aligned again to the new map and can follow the normal
+                // render logic.
+                batch.use(orthoCamera) { super.onTick() }
                 EventDispatcher.dispatch(MapTransitionStopEvent)
+                return
             }
         } else if (mapRenderer.map != null) {
             mapRenderer.setView(orthoCamera)
             mapRenderer.render()
         }
 
-        batch.use(orthoCamera) {
-            super.onTick()
-        }
+        batch.use(orthoCamera) { super.onTick() }
     }
 
     override fun onTickEntity(entity: Entity) {
@@ -131,25 +133,25 @@ class RenderSystem(private val batch: Batch = inject(), private val viewport: Vi
             ConnectionType.LEFT -> {
                 transitionTo.x -= distToPan.x
                 transitionTo.y += mapDiff.y
-                transitionOffset.set(-distToPan.x, -mapDiff.y)
+                transitionOffset.set(-scaledMapWidth, -mapDiff.y)
             }
 
             ConnectionType.RIGHT -> {
                 transitionTo.x += distToPan.x
                 transitionTo.y += mapDiff.y
-                transitionOffset.set(distToPan.x, -mapDiff.y)
+                transitionOffset.set(scaledMapWidth, -mapDiff.y)
             }
 
             ConnectionType.DOWN -> {
                 transitionTo.x += mapDiff.x
                 transitionTo.y -= distToPan.y
-                transitionOffset.set(mapDiff.x, distToPan.y)
+                transitionOffset.set(mapDiff.x, scaledMapHeight)
             }
 
             ConnectionType.UP -> {
                 transitionTo.x += mapDiff.x
                 transitionTo.y += distToPan.y
-                transitionOffset.set(mapDiff.x, -distToPan.y)
+                transitionOffset.set(mapDiff.x, -scaledMapHeight)
             }
         }
     }

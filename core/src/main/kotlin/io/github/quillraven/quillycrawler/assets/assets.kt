@@ -19,9 +19,10 @@ enum class TiledMapAssets(val path: String) {
     START_1("maps/start_1.tmx"),
     EXIT_0("maps/exit_0.tmx"),
     EXIT_1("maps/exit_1.tmx"),
-    TEST("maps/test.tmx");
+    TEST("maps/test.tmx"),
+    TEST2("maps/test2.tmx");
 
-    fun isStartMap(): Boolean = this == TEST || this.name.contains("start", ignoreCase = true)
+    fun isStartMap(): Boolean = this == TEST || this == TEST2 || this.name.contains("start", ignoreCase = true)
 }
 
 class Assets {
