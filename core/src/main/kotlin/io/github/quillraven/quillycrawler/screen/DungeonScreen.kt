@@ -16,7 +16,7 @@ import ktx.app.KtxScreen
 
 class DungeonScreen(private val assets: Assets, private val batch: Batch) : KtxScreen {
 
-    private val viewport: Viewport = ExtendViewport(8f, 4.5f)
+    private val viewport: Viewport = ExtendViewport(16f, 9f)
     private val world = configureWorld {
         injectables {
             add(viewport)
@@ -38,7 +38,10 @@ class DungeonScreen(private val assets: Assets, private val batch: Batch) : KtxS
     override fun show() {
         world.activateKeyboardController()
         world.registerEventListener()
-        tiledMapService.loadMap(TiledMapAssets.START_0)
+        // TODO create Test sourceset for TEST und TEST2
+        // tiledMapService.loadDungeon(TiledMapAssets.TEST)
+        // tiledMapService.loadDungeon(TiledMapAssets.TEST2)
+        tiledMapService.loadDungeon(TiledMapAssets.randomStartMap())
     }
 
     override fun hide() {

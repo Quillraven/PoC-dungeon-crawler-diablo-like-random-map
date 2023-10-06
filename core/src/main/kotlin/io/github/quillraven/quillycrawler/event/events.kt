@@ -36,6 +36,10 @@ data object EventDispatcher {
     }
 
     fun dispatch(event: Event) {
-        listeners.forEach { it.onEvent(event) }
+        // use index iteration instead of forEach to avoid
+        // ConcurrentModification when adding/removing listeners during iteration
+        for (i in 0 until listeners.size) {
+            listeners[i].onEvent(event)
+        }
     }
 }

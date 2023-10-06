@@ -22,7 +22,13 @@ enum class TiledMapAssets(val path: String) {
     TEST("maps/test.tmx"),
     TEST2("maps/test2.tmx");
 
-    fun isStartMap(): Boolean = this == TEST || this == TEST2 || this.name.contains("start", ignoreCase = true)
+    val isTest = this.name.startsWith("TEST")
+
+    val isStart = this.name.startsWith("START")
+
+    companion object {
+        fun randomStartMap() = entries.filter { it.isStart }.random()
+    }
 }
 
 class Assets {
