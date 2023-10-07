@@ -1,6 +1,7 @@
 package io.github.quillraven.quillycrawler.event
 
 import com.badlogic.gdx.maps.MapObject
+import com.badlogic.gdx.math.Vector2
 import com.github.quillraven.fleks.Entity
 import io.github.quillraven.quillycrawler.map.ConnectionType
 import io.github.quillraven.quillycrawler.map.DungeonMap
@@ -23,6 +24,10 @@ data class MapTransitionStartEvent(
 ) : Event
 
 data object MapTransitionStopEvent : Event
+
+data class PlayerCollisionPropEvent(val player: Entity, val prop: Entity, val position: Vector2) : Event
+
+data class PlayerCollisionCharacterEvent(val player: Entity, val character: Entity, val position: Vector2) : Event
 
 data object EventDispatcher {
     private val listeners = mutableListOf<EventListener>()

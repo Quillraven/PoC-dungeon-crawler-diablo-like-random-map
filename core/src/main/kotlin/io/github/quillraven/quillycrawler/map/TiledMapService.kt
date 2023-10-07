@@ -3,9 +3,7 @@ package io.github.quillraven.quillycrawler.map
 import com.badlogic.gdx.maps.MapObject
 import com.badlogic.gdx.maps.tiled.TiledMap
 import com.badlogic.gdx.math.Interpolation
-import com.badlogic.gdx.math.Vector2
 import com.github.quillraven.fleks.World
-import io.github.quillraven.quillycrawler.QuillyCrawler.Companion.UNIT_SCALE
 import io.github.quillraven.quillycrawler.assets.Assets
 import io.github.quillraven.quillycrawler.assets.TiledMapAssets
 import io.github.quillraven.quillycrawler.ecs.CharacterType
@@ -17,9 +15,6 @@ import io.github.quillraven.quillycrawler.ecs.component.Tiled
 import io.github.quillraven.quillycrawler.ecs.system.RenderSystem.Companion.TRANSITION_SPEED
 import io.github.quillraven.quillycrawler.event.*
 import ktx.app.gdxError
-import ktx.math.vec2
-import ktx.tiled.x
-import ktx.tiled.y
 
 class TiledMapService(private val world: World, private val assets: Assets) : EventListener {
 
@@ -38,10 +33,10 @@ class TiledMapService(private val world: World, private val assets: Assets) : Ev
     fun loadDungeon(startMapType: TiledMapAssets) {
         val tiledMap = allTiledMaps[startMapType] ?: gdxError("Map of type $startMapType not loaded")
 
-        activeMap = DungeonMap(startMapType, tiledMap).also { EventDispatcher.register(it) }
+        activeMap = DungeonMap(startMapType, tiledMap, world).also { EventDispatcher.register(it) }
         spawnPlayer()
-        activeMap.spawnCharacters(world)
-        activeMap.spawnProps(world)
+        activeMap.spawnCharacters()
+        activeMap.spawnProps()
 
         EventDispatcher.dispatch(MapLoadEvent(activeMap))
     }
@@ -93,8 +88,8 @@ class TiledMapService(private val world: World, private val assets: Assets) : Ev
                 EventDispatcher.register(activeMap)
 
                 // ... and spawn entities of new map
-                activeMap.spawnProps(world, fadeIn = true)
-                activeMap.spawnCharacters(world, fadeIn = true)
+                activeMap.spawnProps(fadeIn = true)
+                activeMap.spawnCharacters(fadeIn = true)
                 EventDispatcher.dispatch(MapLoadEvent(activeMap))
             }
 
@@ -102,6 +97,3 @@ class TiledMapService(private val world: World, private val assets: Assets) : Ev
         }
     }
 }
-
-val MapObject.scaledPosition: Vector2
-    get() = vec2(this.x * UNIT_SCALE, this.y * UNIT_SCALE)

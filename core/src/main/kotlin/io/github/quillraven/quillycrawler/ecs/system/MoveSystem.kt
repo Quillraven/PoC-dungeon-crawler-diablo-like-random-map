@@ -37,10 +37,13 @@ class MoveSystem : IteratingSystem(family { all(Move, Boundary) }), EventListene
         when (alpha) {
             0f -> updateTarget(entity, boundaryCmp, from, to, direction)
             1f -> {
-                // target reached
+                // target reached ...
                 if (entity has Tags.ROOT) {
-                    // ... entity is rooted -> lock it in place
+                    // ... and entity is rooted -> lock it in place
                     return
+                } else if (entity has Tags.PLAYER) {
+                    // ... and entity is player -> check for char/prop collision
+                    checkPlayerMovementEnd(entity, boundaryCmp)
                 }
 
                 moveCmp.alpha = 0f
@@ -91,11 +94,11 @@ class MoveSystem : IteratingSystem(family { all(Move, Boundary) }), EventListene
         }
 
         if (entity has Tags.PLAYER) {
-            checkPlayerMovement(entity, boundary, to)
+            checkPlayerMovementBegin(entity, boundary, to)
         }
     }
 
-    private fun checkPlayerMovement(entity: Entity, boundary: Boundary, to: Vector2) {
+    private fun checkPlayerMovementBegin(entity: Entity, boundary: Boundary, to: Vector2) {
         val scaledPlayerCenter = boundary.center(TMP_CENTER).div(UNIT_SCALE)
         val mapWidth = currentMap?.tiledMap?.width?.toFloat() ?: 0f
         val mapHeight = currentMap?.tiledMap?.height?.toFloat() ?: 0f
@@ -104,12 +107,23 @@ class MoveSystem : IteratingSystem(family { all(Move, Boundary) }), EventListene
             return
         }
 
-        currentMap?.connections
-            ?.firstOrNull { scaledPlayerCenter in it.shape }
-            ?.let { connection ->
-                LOG.debug { "Player is leaving connection ${connection.id}" }
-                EventDispatcher.dispatch(MapConnectionEvent(entity, connection))
-            }
+        currentMap?.connection(scaledPlayerCenter)?.let { connection ->
+            LOG.debug { "Player is leaving connection ${connection.id}" }
+            EventDispatcher.dispatch(MapConnectionEvent(entity, connection))
+        }
+    }
+
+    private fun checkPlayerMovementEnd(entity: Entity, boundary: Boundary) {
+        currentMap?.character(boundary.position)?.let { character ->
+            LOG.debug { "Colliding with character ${character.id}" }
+            EventDispatcher.dispatch(PlayerCollisionCharacterEvent(entity, character, boundary.position))
+            // TODO trigger combat -> CombatScreen
+        }
+
+        currentMap?.prop(boundary.position)?.let { prop ->
+            LOG.debug { "Colliding with prop ${prop.id}" }
+            EventDispatcher.dispatch(PlayerCollisionPropEvent(entity, prop, boundary.position))
+        }
     }
 
     override fun onEvent(event: Event) {

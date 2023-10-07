@@ -3,10 +3,9 @@ package io.github.quillraven.quillycrawler.map
 import com.badlogic.gdx.maps.MapObject
 import com.badlogic.gdx.maps.MapObjects
 import com.badlogic.gdx.maps.tiled.TiledMap
-import com.badlogic.gdx.maps.tiled.TiledMapTile
-import com.badlogic.gdx.maps.tiled.objects.TiledMapTileMapObject
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Vector2
+import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.World
 import io.github.quillraven.quillycrawler.QuillyCrawler.Companion.UNIT_SCALE
 import io.github.quillraven.quillycrawler.assets.TiledMapAssets
@@ -17,15 +16,11 @@ import io.github.quillraven.quillycrawler.ecs.component.Fade
 import io.github.quillraven.quillycrawler.ecs.component.Graphic
 import io.github.quillraven.quillycrawler.ecs.component.Tiled
 import io.github.quillraven.quillycrawler.ecs.prop
-import io.github.quillraven.quillycrawler.event.Event
-import io.github.quillraven.quillycrawler.event.EventDispatcher
-import io.github.quillraven.quillycrawler.event.EventListener
-import io.github.quillraven.quillycrawler.event.MapTransitionStartEvent
+import io.github.quillraven.quillycrawler.event.*
 import ktx.app.gdxError
 import ktx.log.logger
 import ktx.tiled.id
-import ktx.tiled.layer
-import ktx.tiled.propertyOrNull
+import ktx.tiled.shape
 import ktx.tiled.totalWidth
 import kotlin.collections.set
 
@@ -40,39 +35,53 @@ enum class ConnectionType {
     }
 }
 
-data class DungeonMap(val assetType: TiledMapAssets, val tiledMap: TiledMap) : EventListener {
+data class DungeonMap(
+    val assetType: TiledMapAssets,
+    val tiledMap: TiledMap,
+    val world: World
+) : EventListener {
 
     private val toMapConnections = mutableMapOf<MapObject, DungeonMap>()
-    val connections: MapObjects = tiledMap.connections
-    private val characters = tiledMap.characters.filter { it.tileType != "Player" }
-    private val props = tiledMap.props
+    private val connections: MapObjects = tiledMap.connections
+    private val charMapObjects = tiledMap.characters.filter { it.tileType != "Player" }.associateBy { it.id }.toMutableMap()
+    private val propMapObjects = tiledMap.props.associateBy { it.id }.toMutableMap()
+    private val charEntities = mutableMapOf<Vector2, Entity>()
+    private val propEntities = mutableMapOf<Vector2, Entity>()
     val startPosition: Vector2? = tiledMap.playerStart?.scaledPosition
 
-    fun spawnCharacters(world: World, fadeIn: Boolean = false) {
-        characters.forEach { mapObject ->
-            val tileType = mapObject.tileType
+    fun character(at: Vector2): Entity? = charEntities[at]
 
-            world.character(CharacterType.valueOf(tileType.uppercase()), mapObject.scaledPosition) {
+    fun prop(at: Vector2): Entity? = propEntities[at]
+
+    fun connection(at: Vector2): MapObject? = connections.firstOrNull { at in it.shape }
+
+    fun spawnCharacters(fadeIn: Boolean = false) {
+        charEntities.clear()
+        charMapObjects.values.forEach { mapObject ->
+            val tileType = mapObject.tileType
+            val entity = world.character(CharacterType.valueOf(tileType.uppercase()), mapObject.scaledPosition) {
                 it += Tiled(mapObject)
                 if (fadeIn) {
                     it[Graphic].sprite.setAlpha(0f)
                     it += Fade(Interpolation.fade, 0.75f)
                 }
             }
+            charEntities[mapObject.scaledIntPosition] = entity
         }
     }
 
-    fun spawnProps(world: World, fadeIn: Boolean = false) {
-        props.forEach { mapObject ->
+    fun spawnProps(fadeIn: Boolean = false) {
+        propEntities.clear()
+        propMapObjects.values.forEach { mapObject ->
             val tileType = mapObject.tileType
-
-            world.prop(PropType.valueOf(tileType.uppercase()), mapObject.scaledPosition) {
+            val entity = world.prop(PropType.valueOf(tileType.uppercase()), mapObject.scaledPosition) {
                 it += Tiled(mapObject)
                 if (fadeIn) {
                     it[Graphic].sprite.setAlpha(0f)
                     it += Fade(Interpolation.fade, 0.75f)
                 }
             }
+            propEntities[mapObject.scaledIntPosition] = entity
         }
     }
 
@@ -111,7 +120,7 @@ data class DungeonMap(val assetType: TiledMapAssets, val tiledMap: TiledMap) : E
         val nextMapEntry = potentialMaps.entries.randomOrNull() ?: gdxError("No connecting map for type $type")
         // null is not possible here because of the filter of potentialMaps from above -> use !! operator
         val nextConnection = matchingConnection(type, nextMapEntry.value)!!
-        val nextMap = DungeonMap(nextMapEntry.key, nextMapEntry.value)
+        val nextMap = DungeonMap(nextMapEntry.key, nextMapEntry.value, world)
         toMapConnections[connectionMapObj] = nextMap
         nextMap.toMapConnections[nextConnection] = this
         LOG.debug { "Connecting with type $type to ${potentialMaps.size} potential map(s) -> Found: ${nextMap.assetType}" }
@@ -133,29 +142,30 @@ data class DungeonMap(val assetType: TiledMapAssets, val tiledMap: TiledMap) : E
     }
 
     override fun onEvent(event: Event) {
-        // TODO react on entity removal like character/props (=coins)
+        when (event) {
+            is PlayerCollisionPropEvent -> with(world) {
+                propEntities.remove(event.position)
+                propMapObjects.remove(event.prop[Tiled].mapObject.id)
+                event.prop.remove()
+                // TODO fade out of entity and make animation faster (=coin spin faster) + translate to top
+                // TODO check type of prop in MoveSystem to e.g. only react on coins but not on torches or exits
+                // TODO maybe add PropType enum or TiledType enum and add it to Tiled component.
+                //   this enum can contain information, if it is destructable or not.
+                // TODO remove entity in MoveSystem instead of here and make fadeout from above a world extension function.
+                // TODO add mapObj id to event so we can remove the world reference of a DungeonMap again
+            }
+
+            is PlayerCollisionCharacterEvent -> with(world) {
+                charEntities.remove(event.position)
+                charMapObjects.remove(event.character[Tiled].mapObject.id)
+                event.character.remove()
+            }
+
+            else -> Unit
+        }
     }
 
     companion object {
         private val LOG = logger<DungeonMap>()
     }
 }
-
-private val TiledMapTile.type: String?
-    get() = propertyOrNull("type")
-
-private val MapObject.tileType: String
-    get() = (this as TiledMapTileMapObject).tile?.type
-        ?: gdxError("MapObject ${this.id} is not linked to a tile with a type")
-
-private val TiledMap.characters: MapObjects
-    get() = this.layers["characters"].objects
-
-private val TiledMap.playerStart: MapObject?
-    get() = this.layers["characters"].objects.firstOrNull { it.tileType == "Player" }
-
-private val TiledMap.props: MapObjects
-    get() = this.layers["props"].objects
-
-private val TiledMap.connections: MapObjects
-    get() = this.layer("connections").objects
