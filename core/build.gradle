@@ -11,4 +11,8 @@ dependencies {
   api "io.github.libktx:ktx-tiled:$ktxVersion"
   api "io.github.quillraven.fleks:Fleks:$fleksVersion"
   api "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+
+  testImplementation "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion"
+  testImplementation "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
+  testImplementation files(rootProject.file('assets').path)
 }

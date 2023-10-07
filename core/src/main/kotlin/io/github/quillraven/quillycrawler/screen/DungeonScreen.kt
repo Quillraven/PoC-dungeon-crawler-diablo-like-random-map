@@ -14,7 +14,11 @@ import io.github.quillraven.quillycrawler.ecs.system.*
 import io.github.quillraven.quillycrawler.map.TiledMapService
 import ktx.app.KtxScreen
 
-class DungeonScreen(private val assets: Assets, private val batch: Batch) : KtxScreen {
+class DungeonScreen(
+    private val assets: Assets,
+    private val batch: Batch,
+    private val initialMap: TiledMapAssets = TiledMapAssets.randomStartMap()
+) : KtxScreen {
 
     private val viewport: Viewport = ExtendViewport(16f, 9f)
     private val world = configureWorld {
@@ -38,10 +42,7 @@ class DungeonScreen(private val assets: Assets, private val batch: Batch) : KtxS
     override fun show() {
         world.activateKeyboardController()
         world.registerEventListener()
-        // TODO create Test sourceset for TEST und TEST2
-        // tiledMapService.loadDungeon(TiledMapAssets.TEST)
-        // tiledMapService.loadDungeon(TiledMapAssets.TEST2)
-        tiledMapService.loadDungeon(TiledMapAssets.randomStartMap())
+        tiledMapService.loadDungeon(initialMap)
     }
 
     override fun hide() {
