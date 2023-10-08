@@ -19,10 +19,10 @@ class AnimationSystem(private val assets: Assets = inject()) :
 
     override fun onTickEntity(entity: Entity) {
         val cmp = entity[Animation]
-        val (textureAnimation, stateTime, loop) = cmp
+        val (textureAnimation, stateTime, speed, loop) = cmp
 
         entity[Graphic].sprite.setRegion(textureAnimation.getKeyFrame(stateTime, loop))
-        cmp.stateTime += deltaTime
+        cmp.stateTime += deltaTime * speed
     }
 
     fun textureAnimation(atlasKey: String, type: AnimationType, atlasAsset: TextureAtlasAssets): TextureAnimation {

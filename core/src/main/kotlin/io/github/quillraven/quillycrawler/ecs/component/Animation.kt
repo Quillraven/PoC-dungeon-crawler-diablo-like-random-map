@@ -15,6 +15,7 @@ enum class AnimationType {
 data class Animation(
     var textureAnimation: TextureAnimation,
     var stateTime: Float = 0f,
+    var speed: Float = 1f,
     var loop: Boolean = true,
 ) : Component<Animation> {
     override fun type() = Animation
