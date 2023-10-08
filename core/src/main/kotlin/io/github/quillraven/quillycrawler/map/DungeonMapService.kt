@@ -8,10 +8,7 @@ import io.github.quillraven.quillycrawler.assets.Assets
 import io.github.quillraven.quillycrawler.assets.TiledMapAssets
 import io.github.quillraven.quillycrawler.ecs.CharacterType
 import io.github.quillraven.quillycrawler.ecs.character
-import io.github.quillraven.quillycrawler.ecs.component.Boundary
-import io.github.quillraven.quillycrawler.ecs.component.Fade
-import io.github.quillraven.quillycrawler.ecs.component.Tags
-import io.github.quillraven.quillycrawler.ecs.component.Tiled
+import io.github.quillraven.quillycrawler.ecs.component.*
 import io.github.quillraven.quillycrawler.ecs.system.RenderSystem.Companion.TRANSITION_SPEED
 import io.github.quillraven.quillycrawler.event.*
 import ktx.app.gdxError
@@ -49,6 +46,7 @@ class DungeonMapService(private val world: World, private val assets: Assets) : 
             world.character(CharacterType.PRIEST, startLoc) {
                 it += Tags.PLAYER
                 it += Tags.CAMERA_LOCK
+                it += Inventory(coins = 0)
             }
         } else {
             // relocate player

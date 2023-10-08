@@ -20,7 +20,7 @@ class DungeonScreen(
     private val initialMap: TiledMapAssets = TiledMapAssets.randomStartMap()
 ) : KtxScreen {
 
-    private val viewport: Viewport = ExtendViewport(16f, 9f)
+    private val viewport: Viewport = ExtendViewport(8f, 6f)
     private val world = configureWorld {
         injectables {
             add(viewport)

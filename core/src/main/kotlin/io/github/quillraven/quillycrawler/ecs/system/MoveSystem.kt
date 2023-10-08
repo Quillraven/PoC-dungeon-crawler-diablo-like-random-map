@@ -97,7 +97,7 @@ class MoveSystem : IteratingSystem(family { all(Move, Boundary).none(Remove) }),
         }
     }
 
-    private fun checkPlayerMovementBegin(entity: Entity, boundary: Boundary, to: Vector2) {
+    private fun checkPlayerMovementBegin(player: Entity, boundary: Boundary, to: Vector2) {
         val scaledPlayerCenter = boundary.center(TMP_CENTER).div(UNIT_SCALE)
         val mapWidth = currentMap?.tiledMap?.width?.toFloat() ?: 0f
         val mapHeight = currentMap?.tiledMap?.height?.toFloat() ?: 0f
@@ -108,15 +108,15 @@ class MoveSystem : IteratingSystem(family { all(Move, Boundary).none(Remove) }),
 
         currentMap?.connection(scaledPlayerCenter)?.let { connection ->
             LOG.debug { "Player is leaving connection ${connection.id}" }
-            EventDispatcher.dispatch(MapConnectionEvent(entity, connection))
+            EventDispatcher.dispatch(MapConnectionEvent(player, connection))
         }
     }
 
-    private fun checkPlayerMovementEnd(entity: Entity, boundary: Boundary) {
+    private fun checkPlayerMovementEnd(player: Entity, boundary: Boundary) {
         currentMap?.character(boundary.position)?.let { character ->
             val tiledId = character[Tiled].mapObject.id
             LOG.debug { "Colliding with character $tiledId" }
-            EventDispatcher.dispatch(PlayerCollisionCharacterEvent(entity, character, tiledId, boundary.position))
+            EventDispatcher.dispatch(PlayerCollisionCharacterEvent(player, character, tiledId, boundary.position))
             character.remove()
             // TODO trigger combat -> CombatScreen
         }
@@ -124,14 +124,16 @@ class MoveSystem : IteratingSystem(family { all(Move, Boundary).none(Remove) }),
         currentMap?.prop(boundary.position)?.let { prop ->
             val tiledId = prop[Tiled].mapObject.id
             LOG.debug { "Colliding with prop $tiledId" }
-            EventDispatcher.dispatch(PlayerCollisionPropEvent(entity, prop, tiledId, boundary.position))
+            EventDispatcher.dispatch(PlayerCollisionPropEvent(player, prop, tiledId, boundary.position))
 
             when (prop[Tiled].type) {
                 PropType.COIN -> {
                     world.remove(prop, fadeOutTime = 1.25f, translateTo = vec2(0f, 2f), translateTime = 1.75f)
                     prop[Animation].speed = 5f
-                    // TODO increase player's coin by 1
+                    player[Inventory].coins++
                 }
+
+                else -> Unit
             }
         }
     }
