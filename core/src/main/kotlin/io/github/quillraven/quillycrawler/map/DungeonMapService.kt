@@ -16,7 +16,7 @@ import io.github.quillraven.quillycrawler.ecs.system.RenderSystem.Companion.TRAN
 import io.github.quillraven.quillycrawler.event.*
 import ktx.app.gdxError
 
-class TiledMapService(private val world: World, private val assets: Assets) : EventListener {
+class DungeonMapService(private val world: World, private val assets: Assets) : EventListener {
 
     private val playerEntities = world.family { all(Tags.PLAYER) }
     private val tiledEntities = world.family { all(Tiled) }
@@ -33,10 +33,10 @@ class TiledMapService(private val world: World, private val assets: Assets) : Ev
     fun loadDungeon(startMapType: TiledMapAssets) {
         val tiledMap = allTiledMaps[startMapType] ?: gdxError("Map of type $startMapType not loaded")
 
-        activeMap = DungeonMap(startMapType, tiledMap, world).also { EventDispatcher.register(it) }
+        activeMap = DungeonMap(startMapType, tiledMap).also { EventDispatcher.register(it) }
         spawnPlayer()
-        activeMap.spawnCharacters()
-        activeMap.spawnProps()
+        activeMap.spawnCharacters(world)
+        activeMap.spawnProps(world)
 
         EventDispatcher.dispatch(MapLoadEvent(activeMap))
     }
@@ -88,8 +88,8 @@ class TiledMapService(private val world: World, private val assets: Assets) : Ev
                 EventDispatcher.register(activeMap)
 
                 // ... and spawn entities of new map
-                activeMap.spawnProps(fadeIn = true)
-                activeMap.spawnCharacters(fadeIn = true)
+                activeMap.spawnProps(world, fadeIn = true)
+                activeMap.spawnCharacters(world, fadeIn = true)
                 EventDispatcher.dispatch(MapLoadEvent(activeMap))
             }
 

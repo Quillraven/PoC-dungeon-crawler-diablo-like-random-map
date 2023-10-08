@@ -25,9 +25,19 @@ data class MapTransitionStartEvent(
 
 data object MapTransitionStopEvent : Event
 
-data class PlayerCollisionPropEvent(val player: Entity, val prop: Entity, val position: Vector2) : Event
+data class PlayerCollisionPropEvent(
+    val player: Entity,
+    val prop: Entity,
+    val propId: Int,
+    val position: Vector2
+) : Event
 
-data class PlayerCollisionCharacterEvent(val player: Entity, val character: Entity, val position: Vector2) : Event
+data class PlayerCollisionCharacterEvent(
+    val player: Entity,
+    val character: Entity,
+    val charId: Int,
+    val position: Vector2
+) : Event
 
 data object EventDispatcher {
     private val listeners = mutableListOf<EventListener>()

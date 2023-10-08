@@ -1,17 +1,18 @@
 package io.github.quillraven.quillycrawler.ecs.component
 
 import com.badlogic.gdx.math.Interpolation
+import com.badlogic.gdx.math.Vector2
 import com.github.quillraven.fleks.Component
 import com.github.quillraven.fleks.ComponentType
 
-data class Fade(
+data class Translate(
     val interpolation: Interpolation,
-    val fadeSpeed: Float = 1f,
-    val from: Float = 0f,
-    val to: Float = 1f,
+    val from: Vector2,
+    val translation: Vector2,
+    val speed: Float = 1f,
     var alpha: Float = 0f,
-) : Component<Fade> {
-    override fun type() = Fade
+) : Component<Translate> {
+    override fun type() = Translate
 
-    companion object : ComponentType<Fade>()
+    companion object : ComponentType<Translate>()
 }

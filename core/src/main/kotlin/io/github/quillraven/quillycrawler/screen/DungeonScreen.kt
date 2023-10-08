@@ -11,7 +11,7 @@ import io.github.quillraven.quillycrawler.ecs.activateKeyboardController
 import io.github.quillraven.quillycrawler.ecs.deRegisterEventListener
 import io.github.quillraven.quillycrawler.ecs.registerEventListener
 import io.github.quillraven.quillycrawler.ecs.system.*
-import io.github.quillraven.quillycrawler.map.TiledMapService
+import io.github.quillraven.quillycrawler.map.DungeonMapService
 import ktx.app.KtxScreen
 
 class DungeonScreen(
@@ -33,16 +33,18 @@ class DungeonScreen(
             add(MoveSystem())
             add(AnimationSystem())
             add(FadeSystem())
+            add(TranslateSystem())
             add(CameraSystem())
             add(RenderSystem())
+            add(RemoveSystem())
         }
     }
-    private val tiledMapService = TiledMapService(world, assets)
+    private val dungeonMapService = DungeonMapService(world, assets)
 
     override fun show() {
         world.activateKeyboardController()
         world.registerEventListener()
-        tiledMapService.loadDungeon(initialMap)
+        dungeonMapService.loadDungeon(initialMap)
     }
 
     override fun hide() {

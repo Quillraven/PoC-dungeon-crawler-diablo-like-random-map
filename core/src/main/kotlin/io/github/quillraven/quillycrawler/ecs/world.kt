@@ -3,6 +3,7 @@ package io.github.quillraven.quillycrawler.ecs
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.InputMultiplexer
 import com.badlogic.gdx.graphics.g2d.Sprite
+import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Vector2
 import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.EntityCreateContext
@@ -16,15 +17,18 @@ import io.github.quillraven.quillycrawler.event.EventDispatcher
 import io.github.quillraven.quillycrawler.event.EventListener
 import ktx.app.gdxError
 import ktx.math.vec2
+import kotlin.math.max
 
-enum class CharacterType {
+interface EntityType
+
+enum class CharacterType : EntityType {
     PRIEST,
     SKULL;
 
     val atlasKey: String = this.name.lowercase()
 }
 
-enum class PropType {
+enum class PropType : EntityType {
     TORCH,
     COIN;
 
@@ -73,6 +77,13 @@ fun World.moveTo(entity: Entity, direction: MoveDirection) {
     val move = entity.getOrNull(Move) ?: gdxError("Entity $entity has no move component")
     move.direction = direction
 }
+
+fun World.remove(entity: Entity, fadeOutTime: Float, translateTo: Vector2, translateTime: Float) = entity.configure {
+    it += Fade(Interpolation.fade, 1f / fadeOutTime, from = 1f, to = 0f)
+    it += Translate(Interpolation.circleOut, it[Boundary].position.cpy(), translateTo, 1f / translateTime)
+    it += Remove(max(fadeOutTime, translateTime))
+}
+
 
 private fun currentInputProcessor(): InputMultiplexer {
     var processor = Gdx.input.inputProcessor

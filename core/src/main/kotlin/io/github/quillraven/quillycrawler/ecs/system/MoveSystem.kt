@@ -7,10 +7,9 @@ import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.IteratingSystem
 import com.github.quillraven.fleks.World.Companion.family
 import io.github.quillraven.quillycrawler.QuillyCrawler.Companion.UNIT_SCALE
-import io.github.quillraven.quillycrawler.ecs.component.Boundary
-import io.github.quillraven.quillycrawler.ecs.component.Move
-import io.github.quillraven.quillycrawler.ecs.component.MoveDirection
-import io.github.quillraven.quillycrawler.ecs.component.Tags
+import io.github.quillraven.quillycrawler.ecs.PropType
+import io.github.quillraven.quillycrawler.ecs.component.*
+import io.github.quillraven.quillycrawler.ecs.remove
 import io.github.quillraven.quillycrawler.event.*
 import io.github.quillraven.quillycrawler.map.DungeonMap
 import ktx.log.logger
@@ -20,7 +19,7 @@ import ktx.math.div
 import ktx.math.vec2
 import ktx.tiled.*
 
-class MoveSystem : IteratingSystem(family { all(Move, Boundary) }), EventListener {
+class MoveSystem : IteratingSystem(family { all(Move, Boundary).none(Remove) }), EventListener {
 
     private var currentMap: DungeonMap? = null
     private val playerEntities = world.family { all(Tags.PLAYER) }
@@ -115,14 +114,25 @@ class MoveSystem : IteratingSystem(family { all(Move, Boundary) }), EventListene
 
     private fun checkPlayerMovementEnd(entity: Entity, boundary: Boundary) {
         currentMap?.character(boundary.position)?.let { character ->
-            LOG.debug { "Colliding with character ${character.id}" }
-            EventDispatcher.dispatch(PlayerCollisionCharacterEvent(entity, character, boundary.position))
+            val tiledId = character[Tiled].mapObject.id
+            LOG.debug { "Colliding with character $tiledId" }
+            EventDispatcher.dispatch(PlayerCollisionCharacterEvent(entity, character, tiledId, boundary.position))
+            character.remove()
             // TODO trigger combat -> CombatScreen
         }
 
         currentMap?.prop(boundary.position)?.let { prop ->
-            LOG.debug { "Colliding with prop ${prop.id}" }
-            EventDispatcher.dispatch(PlayerCollisionPropEvent(entity, prop, boundary.position))
+            val tiledId = prop[Tiled].mapObject.id
+            LOG.debug { "Colliding with prop $tiledId" }
+            EventDispatcher.dispatch(PlayerCollisionPropEvent(entity, prop, tiledId, boundary.position))
+
+            when (prop[Tiled].type) {
+                PropType.COIN -> {
+                    world.remove(prop, fadeOutTime = 1.25f, translateTo = vec2(0f, 2f), translateTime = 1.75f)
+                    prop[Animation].speed = 5f
+                    // TODO increase player's coin by 1
+                }
+            }
         }
     }
 

@@ -35,15 +35,12 @@ enum class ConnectionType {
     }
 }
 
-data class DungeonMap(
-    val assetType: TiledMapAssets,
-    val tiledMap: TiledMap,
-    val world: World
-) : EventListener {
+data class DungeonMap(val assetType: TiledMapAssets, val tiledMap: TiledMap) : EventListener {
 
     private val toMapConnections = mutableMapOf<MapObject, DungeonMap>()
     private val connections: MapObjects = tiledMap.connections
-    private val charMapObjects = tiledMap.characters.filter { it.tileType != "Player" }.associateBy { it.id }.toMutableMap()
+    private val charMapObjects =
+        tiledMap.characters.filter { it.tileType != "Player" }.associateBy { it.id }.toMutableMap()
     private val propMapObjects = tiledMap.props.associateBy { it.id }.toMutableMap()
     private val charEntities = mutableMapOf<Vector2, Entity>()
     private val propEntities = mutableMapOf<Vector2, Entity>()
@@ -55,12 +52,12 @@ data class DungeonMap(
 
     fun connection(at: Vector2): MapObject? = connections.firstOrNull { at in it.shape }
 
-    fun spawnCharacters(fadeIn: Boolean = false) {
+    fun spawnCharacters(world: World, fadeIn: Boolean = false) {
         charEntities.clear()
         charMapObjects.values.forEach { mapObject ->
-            val tileType = mapObject.tileType
-            val entity = world.character(CharacterType.valueOf(tileType.uppercase()), mapObject.scaledPosition) {
-                it += Tiled(mapObject)
+            val charType = CharacterType.valueOf(mapObject.tileType.uppercase())
+            val entity = world.character(charType, mapObject.scaledPosition) {
+                it += Tiled(mapObject, charType)
                 if (fadeIn) {
                     it[Graphic].sprite.setAlpha(0f)
                     it += Fade(Interpolation.fade, 0.75f)
@@ -70,12 +67,12 @@ data class DungeonMap(
         }
     }
 
-    fun spawnProps(fadeIn: Boolean = false) {
+    fun spawnProps(world: World, fadeIn: Boolean = false) {
         propEntities.clear()
         propMapObjects.values.forEach { mapObject ->
-            val tileType = mapObject.tileType
-            val entity = world.prop(PropType.valueOf(tileType.uppercase()), mapObject.scaledPosition) {
-                it += Tiled(mapObject)
+            val propType = PropType.valueOf(mapObject.tileType.uppercase())
+            val entity = world.prop(propType, mapObject.scaledPosition) {
+                it += Tiled(mapObject, propType)
                 if (fadeIn) {
                     it[Graphic].sprite.setAlpha(0f)
                     it += Fade(Interpolation.fade, 0.75f)
@@ -120,7 +117,7 @@ data class DungeonMap(
         val nextMapEntry = potentialMaps.entries.randomOrNull() ?: gdxError("No connecting map for type $type")
         // null is not possible here because of the filter of potentialMaps from above -> use !! operator
         val nextConnection = matchingConnection(type, nextMapEntry.value)!!
-        val nextMap = DungeonMap(nextMapEntry.key, nextMapEntry.value, world)
+        val nextMap = DungeonMap(nextMapEntry.key, nextMapEntry.value)
         toMapConnections[connectionMapObj] = nextMap
         nextMap.toMapConnections[nextConnection] = this
         LOG.debug { "Connecting with type $type to ${potentialMaps.size} potential map(s) -> Found: ${nextMap.assetType}" }
@@ -143,22 +140,14 @@ data class DungeonMap(
 
     override fun onEvent(event: Event) {
         when (event) {
-            is PlayerCollisionPropEvent -> with(world) {
+            is PlayerCollisionPropEvent -> {
                 propEntities.remove(event.position)
-                propMapObjects.remove(event.prop[Tiled].mapObject.id)
-                event.prop.remove()
-                // TODO fade out of entity and make animation faster (=coin spin faster) + translate to top
-                // TODO check type of prop in MoveSystem to e.g. only react on coins but not on torches or exits
-                // TODO maybe add PropType enum or TiledType enum and add it to Tiled component.
-                //   this enum can contain information, if it is destructable or not.
-                // TODO remove entity in MoveSystem instead of here and make fadeout from above a world extension function.
-                // TODO add mapObj id to event so we can remove the world reference of a DungeonMap again
+                propMapObjects.remove(event.propId)
             }
 
-            is PlayerCollisionCharacterEvent -> with(world) {
+            is PlayerCollisionCharacterEvent -> {
                 charEntities.remove(event.position)
-                charMapObjects.remove(event.character[Tiled].mapObject.id)
-                event.character.remove()
+                charMapObjects.remove(event.charId)
             }
 
             else -> Unit
