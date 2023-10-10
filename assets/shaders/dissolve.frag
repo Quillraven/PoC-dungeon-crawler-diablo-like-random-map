@@ -18,8 +18,8 @@ void main() {
     // convert atlas UV to normal UV (0,0 .. 1,1)
     vec2 uvRange = u_atlasMaxUV - u_uvOffset;
     vec2 realUV = (v_texCoords - u_uvOffset) / uvRange;
-    // we split the sprite into multiple cells (=fragmentNumer)
-    // -> calculate cell of fragment
+    // we split the sprite into multiple cells (=fragmentNumber)
+    // -> calculate pixel fractional of its cell location (=0.0 .. 0.99)
     vec2 pixelFract = fract(realUV * u_fragmentNumber);
     // get distance to its center
     float pixelDistance = distance(pixelFract, vec2(0.5, 0.5f));
