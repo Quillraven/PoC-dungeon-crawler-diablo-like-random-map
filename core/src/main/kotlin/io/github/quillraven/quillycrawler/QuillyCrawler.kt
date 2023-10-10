@@ -32,6 +32,8 @@ class QuillyCrawler : KtxGame<KtxScreen>() {
     }
 
     companion object {
+        // TODO add game viewport utility method that can also be used in tests like ShaderTest
+        // TODO add dissolve shader + scaling when removing characters
         const val UNIT_SCALE = 1 / 16f
     }
 }

@@ -32,11 +32,18 @@ enum class TiledMapAssets(val path: String) {
 }
 
 class Assets {
-    private val assetManager = AssetManager()
+
+    @PublishedApi
+    internal val assetManager = AssetManager()
 
     operator fun get(asset: TiledMapAssets): TiledMap = assetManager.getAsset<TiledMap>(asset.path)
 
     operator fun get(asset: TextureAtlasAssets): TextureAtlas = assetManager.getAsset<TextureAtlas>(asset.path)
+
+    inline fun <reified T> load(path: String): T {
+        assetManager.load(path, T::class.java)
+        return assetManager.finishLoadingAsset(path)
+    }
 
     fun loadAll() {
         assetManager.setLoader(TmxMapLoader(assetManager.fileHandleResolver))

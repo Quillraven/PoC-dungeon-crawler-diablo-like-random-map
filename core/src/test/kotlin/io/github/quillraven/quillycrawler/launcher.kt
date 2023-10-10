@@ -6,8 +6,11 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration
 
 fun main() {
-    Lwjgl3Application(MapTransitionTest(), Lwjgl3ApplicationConfiguration().apply {
-        setTitle("Test Quilly Crawler")
+    // val application = MapTransitionTest()
+    val application = ShaderTest()
+
+    Lwjgl3Application(application, Lwjgl3ApplicationConfiguration().apply {
+        setTitle(application::class.java.simpleName)
         setWindowedMode(640, 480)
     })
 }
