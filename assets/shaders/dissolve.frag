@@ -22,10 +22,8 @@ void main() {
     // -> calculate pixel fractional of its cell location (=0.0 .. 0.99)
     vec2 pixelFract = fract(realUV * u_fragmentNumber);
     // get distance to its center
-    float pixelDistance = distance(pixelFract, vec2(0.5, 0.5f));
+    float pixelDistance = distance(pixelFract, vec2(0.5, 0.5));
     // modify alpha value of fragment according to its distance of the center and dissolve value (=0..1)
     gl_FragColor = v_color * texture2D(u_texture, v_texCoords);
-    if (gl_FragColor.a > 0.0) {
-        gl_FragColor.a = step(pixelDistance, u_dissolve);
-    }
+    gl_FragColor.a *= step(pixelDistance, u_dissolve);
 }
