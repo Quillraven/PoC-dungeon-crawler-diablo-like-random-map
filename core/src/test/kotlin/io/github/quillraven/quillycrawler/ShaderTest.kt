@@ -27,10 +27,10 @@ class ShaderTest : ApplicationAdapter() {
     private val assets = Assets()
     private val shaderSprite = Sprite()
     private val normalSprite = Sprite()
-    private val explosionShader by lazy {
+    private val dissolveShader by lazy {
         val program = ShaderProgram("shaders/dissolve.vert".toInternalFile(), "shaders/dissolve.frag".toInternalFile())
         if (!program.isCompiled) {
-            gdxError("Cannot compile explosion shader: ${program.log}")
+            gdxError("Cannot compile dissolve shader: ${program.log}")
         }
         program
     }
@@ -60,7 +60,7 @@ class ShaderTest : ApplicationAdapter() {
 
         viewport.apply()
         batch.use(viewport.camera) {
-            if (it.shader == explosionShader) {
+            if (it.shader == dissolveShader) {
                 it.shader.use {
                     val deltaTime = Gdx.graphics.deltaTime
                     shaderDissolve = (shaderDissolve + dissolveDirection * deltaTime * 0.5f).coerceIn(0f, 1f)
@@ -68,10 +68,10 @@ class ShaderTest : ApplicationAdapter() {
                     shaderSprite.setOriginCenter()
 
                     val scaledSpriteSize = vec2(shaderSprite.width / UNIT_SCALE, shaderSprite.height / UNIT_SCALE)
-                    explosionShader.setUniformf("u_dissolve", shaderDissolve)
-                    explosionShader.setUniformf("u_uvOffset", vec2(shaderSprite.u, shaderSprite.v))
-                    explosionShader.setUniformf("u_atlasMaxUV", vec2(shaderSprite.u2, shaderSprite.v2))
-                    explosionShader.setUniformf("u_fragmentNumber", scaledSpriteSize)
+                    dissolveShader.setUniformf("u_dissolve", shaderDissolve)
+                    dissolveShader.setUniformf("u_uvOffset", vec2(shaderSprite.u, shaderSprite.v))
+                    dissolveShader.setUniformf("u_atlasMaxUV", vec2(shaderSprite.u2, shaderSprite.v2))
+                    dissolveShader.setUniformf("u_fragmentNumber", scaledSpriteSize)
 
                     if (shaderDissolve >= 1f || shaderDissolve <= 0f) {
                         dissolveDirection = -dissolveDirection
@@ -88,7 +88,7 @@ class ShaderTest : ApplicationAdapter() {
 
         when {
             Gdx.input.isKeyJustPressed(Input.Keys.NUM_1) -> batch.shader = null
-            Gdx.input.isKeyJustPressed(Input.Keys.NUM_2) -> batch.shader = explosionShader
+            Gdx.input.isKeyJustPressed(Input.Keys.NUM_2) -> batch.shader = dissolveShader
         }
 
         Gdx.graphics.setTitle("ShaderTest FPS: " + Gdx.graphics.framesPerSecond)
@@ -96,7 +96,7 @@ class ShaderTest : ApplicationAdapter() {
 
     override fun dispose() {
         batch.disposeSafely()
-        explosionShader.disposeSafely()
+        dissolveShader.disposeSafely()
         assets.dispose()
     }
 }

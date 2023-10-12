@@ -78,10 +78,29 @@ fun World.moveTo(entity: Entity, direction: MoveDirection) {
     move.direction = direction
 }
 
-fun World.remove(entity: Entity, fadeOutTime: Float, translateTo: Vector2, translateTime: Float) = entity.configure {
-    it += Fade(Interpolation.fade, 1f / fadeOutTime, from = 1f, to = 0f)
-    it += Translate(Interpolation.circleOut, it[Boundary].position.cpy(), translateTo, 1f / translateTime)
-    it += Remove(max(fadeOutTime, translateTime))
+fun World.remove(
+    entity: Entity,
+    fadeOutTime: Float = 0f,
+    translateBy: Vector2 = Vector2.Zero,
+    translateTime: Float = 0f,
+    scaleBy: Vector2 = Vector2.Zero,
+    scaleTime: Float = 0f,
+    dissolveTime: Float = 0f,
+) = entity.configure {
+    if (fadeOutTime > 0f) {
+        it += Fade(Interpolation.fade, 1f / fadeOutTime, from = 1f, to = 0f)
+    }
+    if (translateTime > 0f) {
+        it += Translate(Interpolation.circleOut, it[Boundary].position.cpy(), translateBy, 1f / translateTime)
+    }
+    if (scaleTime > 0f) {
+        val sprite = it[Graphic].sprite
+        it += Scale(Interpolation.circleOut, vec2(sprite.scaleX, sprite.scaleY), scaleBy, 1f / scaleTime)
+    }
+    if (dissolveTime > 0f) {
+        it += Dissolve.of(it[Graphic].sprite, 1f / dissolveTime)
+    }
+    it += Remove(max(dissolveTime, max(fadeOutTime, translateTime)))
 }
 
 

@@ -117,7 +117,7 @@ class MoveSystem : IteratingSystem(family { all(Move, Boundary).none(Remove) }),
             val tiledId = character[Tiled].mapObject.id
             LOG.debug { "Colliding with character $tiledId" }
             EventDispatcher.dispatch(PlayerCollisionCharacterEvent(player, character, tiledId, boundary.position))
-            character.remove()
+            world.remove(character, dissolveTime = 0.75f, scaleBy = vec2(1.25f, 1.25f), scaleTime = 1f)
             // TODO trigger combat -> CombatScreen
         }
 
@@ -128,7 +128,7 @@ class MoveSystem : IteratingSystem(family { all(Move, Boundary).none(Remove) }),
 
             when (prop[Tiled].type) {
                 PropType.COIN -> {
-                    world.remove(prop, fadeOutTime = 1.25f, translateTo = vec2(0f, 2f), translateTime = 1.75f)
+                    world.remove(prop, fadeOutTime = 1.25f, translateBy = vec2(0f, 2f), translateTime = 1.75f)
                     prop[Animation].speed = 5f
                     player[Inventory].coins++
                 }

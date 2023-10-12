@@ -2,6 +2,7 @@ package io.github.quillraven.quillycrawler.ecs.system
 
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.Batch
+import com.badlogic.gdx.graphics.glutils.ShaderProgram
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.utils.viewport.Viewport
@@ -12,10 +13,13 @@ import com.github.quillraven.fleks.World.Companion.inject
 import com.github.quillraven.fleks.collection.compareEntityBy
 import io.github.quillraven.quillycrawler.QuillyCrawler.Companion.UNIT_SCALE
 import io.github.quillraven.quillycrawler.ecs.component.Boundary
+import io.github.quillraven.quillycrawler.ecs.component.Dissolve
 import io.github.quillraven.quillycrawler.ecs.component.Graphic
 import io.github.quillraven.quillycrawler.event.*
 import io.github.quillraven.quillycrawler.map.ConnectionType
+import ktx.app.gdxError
 import ktx.assets.disposeSafely
+import ktx.assets.toInternalFile
 import ktx.graphics.update
 import ktx.graphics.use
 import ktx.math.vec2
@@ -24,6 +28,7 @@ import ktx.tiled.totalWidth
 import ktx.tiled.x
 import ktx.tiled.y
 import kotlin.math.min
+
 
 class RenderSystem(private val batch: Batch = inject(), private val viewport: Viewport = inject()) : IteratingSystem(
     family = family { all(Graphic, Boundary) },
@@ -40,6 +45,12 @@ class RenderSystem(private val batch: Batch = inject(), private val viewport: Vi
     private val transitionFrom = vec2()
     private val transitionTo = vec2()
     private val transitionOffset = vec2()
+
+    private val dissolveEntities = mutableListOf<Entity>()
+    private val dissolveShader = ShaderProgram(
+        "shaders/dissolve.vert".toInternalFile(),
+        "shaders/dissolve.frag".toInternalFile()
+    ).apply { if (!isCompiled) gdxError("Cannot compile dissolve shader: $log") }
 
     override fun onTick() {
         viewport.apply()
@@ -80,7 +91,7 @@ class RenderSystem(private val batch: Batch = inject(), private val viewport: Vi
                 // Therefore, we need to render the entities before triggering the event to avoid some flickering.
                 // In the next frame, entity positions are aligned again to the new map and can follow the normal
                 // render logic.
-                batch.use(orthoCamera) { super.onTick() }
+                renderEntities()
                 EventDispatcher.dispatch(MapTransitionStopEvent)
                 return
             }
@@ -89,7 +100,33 @@ class RenderSystem(private val batch: Batch = inject(), private val viewport: Vi
             mapRenderer.render()
         }
 
-        batch.use(orthoCamera) { super.onTick() }
+        renderEntities()
+    }
+
+    private fun renderEntities() {
+        batch.use(orthoCamera) {
+            dissolveEntities.clear()
+            // render all entities (+ adjust their sprite position, size, ...)
+            super.onTick()
+            // render any dissolve entities. This requires a shader change (=flush)
+            if (dissolveEntities.isNotEmpty()) {
+                batch.shader = dissolveShader
+                dissolveEntities.forEach { e -> renderDissolvedEntity(e) }
+                batch.shader = null
+            }
+        }
+    }
+
+    private fun renderDissolvedEntity(entity: Entity) {
+        val (_, uvOffset, uvMax, numFragments, value) = entity[Dissolve]
+        val (sprite) = entity[Graphic]
+
+        dissolveShader.setUniformf("u_dissolve", value)
+        dissolveShader.setUniformf("u_uvOffset", uvOffset)
+        dissolveShader.setUniformf("u_atlasMaxUV", uvMax)
+        dissolveShader.setUniformf("u_fragmentNumber", numFragments)
+
+        sprite.draw(batch)
     }
 
     override fun onTickEntity(entity: Entity) {
@@ -99,6 +136,12 @@ class RenderSystem(private val batch: Batch = inject(), private val viewport: Vi
         sprite.setBounds(position.x, position.y, size.x, size.y)
         sprite.setOriginCenter()
         sprite.rotation = rotation
+
+        if (entity has Dissolve) {
+            // dissolved entities get rendered separately to avoid multiple flushes due to shader changes
+            dissolveEntities += entity
+            return
+        }
         sprite.draw(batch)
     }
 
@@ -159,6 +202,7 @@ class RenderSystem(private val batch: Batch = inject(), private val viewport: Vi
     override fun onDispose() {
         mapRenderer.disposeSafely()
         transitionMapRenderer.disposeSafely()
+        dissolveShader.disposeSafely()
     }
 
     private operator fun OrthographicCamera.component1() = this.position.x
@@ -173,3 +217,4 @@ class RenderSystem(private val batch: Batch = inject(), private val viewport: Vi
         const val TRANSITION_SPEED = 0.8f
     }
 }
+
