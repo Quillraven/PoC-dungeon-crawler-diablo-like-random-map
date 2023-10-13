@@ -121,10 +121,10 @@ class RenderSystem(
         val (_, uvOffset, uvMax, numFragments, value) = entity[Dissolve]
         val (sprite) = entity[Graphic]
 
-        dissolveShader.setUniformf("u_dissolve", value)
-        dissolveShader.setUniformf("u_uvOffset", uvOffset)
-        dissolveShader.setUniformf("u_atlasMaxUV", uvMax)
-        dissolveShader.setUniformf("u_fragmentNumber", numFragments)
+        dissolveShader.setUniformf(ShaderAssets.DISSOLVE_VALUE, value)
+        dissolveShader.setUniformf(ShaderAssets.DISSOLVE_UV_OFFSET, uvOffset)
+        dissolveShader.setUniformf(ShaderAssets.DISSOLVE_ATLAS_MAX_UV, uvMax)
+        dissolveShader.setUniformf(ShaderAssets.DISSOLVE_FRAG_NUMBER, numFragments)
 
         sprite.draw(batch)
     }

@@ -35,7 +35,14 @@ enum class TiledMapAssets(val path: String) {
 }
 
 enum class ShaderAssets(val vertexPath: String, val fragmentPath: String) {
-    DISSOLVE("shaders/default.vert", "shaders/dissolve.frag"),
+    DISSOLVE("shaders/default.vert", "shaders/dissolve.frag");
+
+    companion object {
+        var DISSOLVE_VALUE = -1
+        var DISSOLVE_UV_OFFSET = -1
+        var DISSOLVE_ATLAS_MAX_UV = -1
+        var DISSOLVE_FRAG_NUMBER = -1
+    }
 }
 
 class Assets {
@@ -76,11 +83,20 @@ class Assets {
 
         assetManager.finishLoading()
 
-        // verify shaders
+        // verify shaders and init ShaderAssets uniform locations
         ShaderAssets.entries.forEach { shaderAsset ->
             val shader = this[shaderAsset]
             if (!shader.isCompiled) {
                 gdxError("Shader " + shaderAsset + " could not be loaded: ${shader.log}")
+            }
+
+            when (shaderAsset) {
+                ShaderAssets.DISSOLVE -> {
+                    ShaderAssets.DISSOLVE_VALUE = shader.getUniformLocation("u_dissolve")
+                    ShaderAssets.DISSOLVE_UV_OFFSET = shader.getUniformLocation("u_uvOffset")
+                    ShaderAssets.DISSOLVE_ATLAS_MAX_UV = shader.getUniformLocation("u_atlasMaxUV")
+                    ShaderAssets.DISSOLVE_FRAG_NUMBER = shader.getUniformLocation("u_fragmentNumber")
+                }
             }
         }
     }
