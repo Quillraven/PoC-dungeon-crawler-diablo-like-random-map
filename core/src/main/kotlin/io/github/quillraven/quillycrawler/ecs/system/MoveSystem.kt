@@ -117,7 +117,7 @@ class MoveSystem : IteratingSystem(family { all(Move, Boundary).none(Remove) }),
             val tiledId = character[Tiled].mapObject.id
             LOG.debug { "Colliding with character $tiledId" }
             EventDispatcher.dispatch(PlayerCollisionCharacterEvent(player, character, tiledId, boundary.position))
-            world.remove(character, dissolveTime = 0.75f, scaleBy = vec2(1.25f, 1.25f), scaleTime = 1f)
+            world.remove(character, dissolveTime = 1.25f, scaleBy = vec2(1f, 1f), scaleTime = 1.5f)
             // TODO trigger combat -> CombatScreen
         }
 

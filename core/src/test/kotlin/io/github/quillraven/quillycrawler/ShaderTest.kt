@@ -7,16 +7,14 @@ import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.Sprite
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
-import com.badlogic.gdx.graphics.glutils.ShaderProgram
 import com.badlogic.gdx.utils.ScreenUtils
 import com.badlogic.gdx.utils.viewport.ExtendViewport
 import com.badlogic.gdx.utils.viewport.Viewport
 import io.github.quillraven.quillycrawler.QuillyCrawler.Companion.UNIT_SCALE
 import io.github.quillraven.quillycrawler.assets.Assets
+import io.github.quillraven.quillycrawler.assets.ShaderAssets
 import io.github.quillraven.quillycrawler.assets.TextureAtlasAssets
-import ktx.app.gdxError
 import ktx.assets.disposeSafely
-import ktx.assets.toInternalFile
 import ktx.graphics.use
 import ktx.math.vec2
 
@@ -27,13 +25,7 @@ class ShaderTest : ApplicationAdapter() {
     private val assets = Assets()
     private val shaderSprite = Sprite()
     private val normalSprite = Sprite()
-    private val dissolveShader by lazy {
-        val program = ShaderProgram("shaders/dissolve.vert".toInternalFile(), "shaders/dissolve.frag".toInternalFile())
-        if (!program.isCompiled) {
-            gdxError("Cannot compile dissolve shader: ${program.log}")
-        }
-        program
-    }
+    private val dissolveShader by lazy { assets.loadShader(ShaderAssets.DISSOLVE) }
     private var shaderDissolve = 0f
     private var dissolveDirection = 1f
 
@@ -64,7 +56,7 @@ class ShaderTest : ApplicationAdapter() {
                 it.shader.use {
                     val deltaTime = Gdx.graphics.deltaTime
                     shaderDissolve = (shaderDissolve + dissolveDirection * deltaTime * 0.5f).coerceIn(0f, 1f)
-                    shaderSprite.setScale(1f + (1f - shaderDissolve), 1f + (1f - shaderDissolve))
+                    shaderSprite.setScale(1f + shaderDissolve, 1f + shaderDissolve)
                     shaderSprite.setOriginCenter()
 
                     val scaledSpriteSize = vec2(shaderSprite.width / UNIT_SCALE, shaderSprite.height / UNIT_SCALE)
@@ -96,7 +88,6 @@ class ShaderTest : ApplicationAdapter() {
 
     override fun dispose() {
         batch.disposeSafely()
-        dissolveShader.disposeSafely()
         assets.dispose()
     }
 }

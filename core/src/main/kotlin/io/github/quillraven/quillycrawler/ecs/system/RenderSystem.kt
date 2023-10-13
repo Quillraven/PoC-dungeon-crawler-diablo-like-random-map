@@ -2,7 +2,6 @@ package io.github.quillraven.quillycrawler.ecs.system
 
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.Batch
-import com.badlogic.gdx.graphics.glutils.ShaderProgram
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.utils.viewport.Viewport
@@ -12,14 +11,14 @@ import com.github.quillraven.fleks.World.Companion.family
 import com.github.quillraven.fleks.World.Companion.inject
 import com.github.quillraven.fleks.collection.compareEntityBy
 import io.github.quillraven.quillycrawler.QuillyCrawler.Companion.UNIT_SCALE
+import io.github.quillraven.quillycrawler.assets.Assets
+import io.github.quillraven.quillycrawler.assets.ShaderAssets
 import io.github.quillraven.quillycrawler.ecs.component.Boundary
 import io.github.quillraven.quillycrawler.ecs.component.Dissolve
 import io.github.quillraven.quillycrawler.ecs.component.Graphic
 import io.github.quillraven.quillycrawler.event.*
 import io.github.quillraven.quillycrawler.map.ConnectionType
-import ktx.app.gdxError
 import ktx.assets.disposeSafely
-import ktx.assets.toInternalFile
 import ktx.graphics.update
 import ktx.graphics.use
 import ktx.math.vec2
@@ -30,7 +29,11 @@ import ktx.tiled.y
 import kotlin.math.min
 
 
-class RenderSystem(private val batch: Batch = inject(), private val viewport: Viewport = inject()) : IteratingSystem(
+class RenderSystem(
+    private val batch: Batch = inject(),
+    private val viewport: Viewport = inject(),
+    assets: Assets = inject()
+) : IteratingSystem(
     family = family { all(Graphic, Boundary) },
     comparator = compareEntityBy(Boundary),
 ), EventListener {
@@ -47,10 +50,7 @@ class RenderSystem(private val batch: Batch = inject(), private val viewport: Vi
     private val transitionOffset = vec2()
 
     private val dissolveEntities = mutableListOf<Entity>()
-    private val dissolveShader = ShaderProgram(
-        "shaders/dissolve.vert".toInternalFile(),
-        "shaders/dissolve.frag".toInternalFile()
-    ).apply { if (!isCompiled) gdxError("Cannot compile dissolve shader: $log") }
+    private val dissolveShader = assets[ShaderAssets.DISSOLVE]
 
     override fun onTick() {
         viewport.apply()
@@ -202,7 +202,6 @@ class RenderSystem(private val batch: Batch = inject(), private val viewport: Vi
     override fun onDispose() {
         mapRenderer.disposeSafely()
         transitionMapRenderer.disposeSafely()
-        dissolveShader.disposeSafely()
     }
 
     private operator fun OrthographicCamera.component1() = this.position.x

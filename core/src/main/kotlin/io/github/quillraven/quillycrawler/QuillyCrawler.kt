@@ -33,8 +33,6 @@ class QuillyCrawler : KtxGame<KtxScreen>() {
 
     companion object {
         // TODO add game viewport utility method that can also be used in tests like ShaderTest
-        // TODO rename dissolve vertex shader to default
-        // TODO make shaders an asset (=part of loadAll + dispose)
         // TODO also use shader int location for uniforms instead of strings
         // TODO add debug logging to delayed removal
         // TODO add DebugSystem for profiling (render calls, fps, num entities, ...)

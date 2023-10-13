@@ -1,4 +1,4 @@
-@file:JvmName("Launcher")
+@file:JvmName("TestLauncher")
 
 package io.github.quillraven.quillycrawler
 

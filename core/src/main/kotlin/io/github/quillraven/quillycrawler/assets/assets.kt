@@ -1,9 +1,12 @@
 package io.github.quillraven.quillycrawler.assets
 
 import com.badlogic.gdx.assets.AssetManager
+import com.badlogic.gdx.assets.loaders.ShaderProgramLoader.ShaderProgramParameter
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
+import com.badlogic.gdx.graphics.glutils.ShaderProgram
 import com.badlogic.gdx.maps.tiled.TiledMap
 import com.badlogic.gdx.maps.tiled.TmxMapLoader
+import ktx.app.gdxError
 import ktx.assets.disposeSafely
 import ktx.assets.getAsset
 import ktx.assets.load
@@ -31,6 +34,10 @@ enum class TiledMapAssets(val path: String) {
     }
 }
 
+enum class ShaderAssets(val vertexPath: String, val fragmentPath: String) {
+    DISSOLVE("shaders/default.vert", "shaders/dissolve.frag"),
+}
+
 class Assets {
 
     @PublishedApi
@@ -40,9 +47,19 @@ class Assets {
 
     operator fun get(asset: TextureAtlasAssets): TextureAtlas = assetManager.getAsset<TextureAtlas>(asset.path)
 
+    operator fun get(asset: ShaderAssets): ShaderProgram = assetManager.getAsset<ShaderProgram>(asset.name)
+
     inline fun <reified T> load(path: String): T {
         assetManager.load(path, T::class.java)
         return assetManager.finishLoadingAsset(path)
+    }
+
+    fun loadShader(type: ShaderAssets): ShaderProgram {
+        assetManager.load<ShaderProgram>(type.name, ShaderProgramParameter().apply {
+            vertexFile = type.vertexPath
+            fragmentFile = type.fragmentPath
+        })
+        return assetManager.finishLoadingAsset(type.name)
     }
 
     fun loadAll() {
@@ -50,8 +67,22 @@ class Assets {
 
         TextureAtlasAssets.entries.forEach { assetManager.load<TextureAtlas>(it.path) }
         TiledMapAssets.entries.forEach { assetManager.load<TiledMap>(it.path) }
+        ShaderAssets.entries.forEach { shaderAsset ->
+            assetManager.load<ShaderProgram>(shaderAsset.name, ShaderProgramParameter().apply {
+                vertexFile = shaderAsset.vertexPath
+                fragmentFile = shaderAsset.fragmentPath
+            })
+        }
 
         assetManager.finishLoading()
+
+        // verify shaders
+        ShaderAssets.entries.forEach { shaderAsset ->
+            val shader = this[shaderAsset]
+            if (!shader.isCompiled) {
+                gdxError("Shader " + shaderAsset + " could not be loaded: ${shader.log}")
+            }
+        }
     }
 
     fun dispose() {

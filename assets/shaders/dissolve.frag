@@ -25,5 +25,5 @@ void main() {
     float pixelDistance = distance(pixelFract, vec2(0.5, 0.5));
     // modify alpha value of fragment according to its distance of the center and dissolve value (=0..1)
     gl_FragColor = v_color * texture2D(u_texture, v_texCoords);
-    gl_FragColor.a *= step(u_dissolve, pixelDistance);
+    gl_FragColor.a *= step(pixelDistance, 1.0 - u_dissolve);
 }
