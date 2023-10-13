@@ -4,6 +4,7 @@ import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.IteratingSystem
 import com.github.quillraven.fleks.World.Companion.family
 import io.github.quillraven.quillycrawler.ecs.component.Remove
+import ktx.log.logger
 
 class RemoveSystem : IteratingSystem(family { all(Remove) }) {
 
@@ -11,8 +12,13 @@ class RemoveSystem : IteratingSystem(family { all(Remove) }) {
         val removeCmp = entity[Remove]
         removeCmp.time -= deltaTime
         if (removeCmp.time <= 0f) {
+            LOG.debug { "Entity $entity removed via delay." }
             entity.remove()
         }
+    }
+
+    companion object {
+        private val LOG = logger<RemoveSystem>()
     }
 
 }
