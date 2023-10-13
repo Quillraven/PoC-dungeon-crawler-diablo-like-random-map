@@ -8,9 +8,9 @@ import com.badlogic.gdx.graphics.g2d.Sprite
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.utils.ScreenUtils
-import com.badlogic.gdx.utils.viewport.ExtendViewport
 import com.badlogic.gdx.utils.viewport.Viewport
 import io.github.quillraven.quillycrawler.QuillyCrawler.Companion.UNIT_SCALE
+import io.github.quillraven.quillycrawler.QuillyCrawler.Companion.gameViewport
 import io.github.quillraven.quillycrawler.assets.Assets
 import io.github.quillraven.quillycrawler.assets.ShaderAssets
 import io.github.quillraven.quillycrawler.assets.TextureAtlasAssets
@@ -20,7 +20,7 @@ import ktx.math.vec2
 
 class ShaderTest : ApplicationAdapter() {
 
-    private val viewport: Viewport = ExtendViewport(8f, 4.5f)
+    private val viewport: Viewport = gameViewport()
     private val batch: Batch by lazy { SpriteBatch() }
     private val assets = Assets()
     private val shaderSprite = Sprite()

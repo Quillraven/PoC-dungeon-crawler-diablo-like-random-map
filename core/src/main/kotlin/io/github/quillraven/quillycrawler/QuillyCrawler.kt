@@ -4,6 +4,8 @@ import com.badlogic.gdx.Application
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
+import com.badlogic.gdx.utils.viewport.ExtendViewport
+import com.badlogic.gdx.utils.viewport.Viewport
 import io.github.quillraven.quillycrawler.assets.Assets
 import io.github.quillraven.quillycrawler.screen.DungeonScreen
 import ktx.app.KtxGame
@@ -32,8 +34,9 @@ class QuillyCrawler : KtxGame<KtxScreen>() {
     }
 
     companion object {
-        // TODO add game viewport utility method that can also be used in tests like ShaderTest
         // TODO add DebugSystem for profiling (render calls, fps, num entities, ...)
         const val UNIT_SCALE = 1 / 16f
+
+        fun gameViewport(): Viewport = ExtendViewport(8f, 6f)
     }
 }

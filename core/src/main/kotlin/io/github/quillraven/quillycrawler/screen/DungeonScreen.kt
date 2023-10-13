@@ -2,9 +2,9 @@ package io.github.quillraven.quillycrawler.screen
 
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.Batch
-import com.badlogic.gdx.utils.viewport.ExtendViewport
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.github.quillraven.fleks.configureWorld
+import io.github.quillraven.quillycrawler.QuillyCrawler.Companion.gameViewport
 import io.github.quillraven.quillycrawler.assets.Assets
 import io.github.quillraven.quillycrawler.assets.TiledMapAssets
 import io.github.quillraven.quillycrawler.ecs.activateKeyboardController
@@ -20,7 +20,7 @@ class DungeonScreen(
     private val initialMap: TiledMapAssets = TiledMapAssets.randomStartMap()
 ) : KtxScreen {
 
-    private val viewport: Viewport = ExtendViewport(8f, 6f)
+    private val viewport: Viewport = gameViewport()
     private val world = configureWorld {
         injectables {
             add(viewport)
