@@ -39,6 +39,7 @@ class DungeonScreen(
             add(CameraSystem())
             add(RenderSystem())
             add(RemoveSystem())
+            add(DebugSystem())
         }
     }
     private val dungeonMapService = DungeonMapService(world, assets)

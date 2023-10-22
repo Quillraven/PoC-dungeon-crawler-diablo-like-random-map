@@ -12,6 +12,8 @@ import ktx.app.KtxGame
 import ktx.app.KtxScreen
 import ktx.assets.disposeSafely
 
+// TODO add more enemies + move pattern (circle, follow walls, mimic player)
+
 class QuillyCrawler : KtxGame<KtxScreen>() {
 
     private val batch: Batch by lazy { SpriteBatch() }
@@ -34,7 +36,6 @@ class QuillyCrawler : KtxGame<KtxScreen>() {
     }
 
     companion object {
-        // TODO add DebugSystem for profiling (render calls, fps, num entities, ...)
         const val UNIT_SCALE = 1 / 16f
 
         fun gameViewport(): Viewport = ExtendViewport(8f, 6f)
