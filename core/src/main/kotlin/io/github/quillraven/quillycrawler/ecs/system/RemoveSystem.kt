@@ -8,10 +8,9 @@ import ktx.log.logger
 
 class RemoveSystem : IteratingSystem(family { all(Remove) }) {
 
-    override fun onTickEntity(entity: Entity) {
-        val removeCmp = entity[Remove]
-        removeCmp.time -= deltaTime
-        if (removeCmp.time <= 0f) {
+    override fun onTickEntity(entity: Entity) = with(entity[Remove]) {
+        time -= deltaTime
+        if (time <= 0f) {
             LOG.debug { "Entity $entity removed via delay." }
             entity.remove()
         }

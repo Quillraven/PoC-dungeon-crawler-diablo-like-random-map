@@ -7,9 +7,8 @@ import io.github.quillraven.quillycrawler.ecs.component.Dissolve
 
 class DissolveSystem : IteratingSystem(family { all(Dissolve) }) {
 
-    override fun onTickEntity(entity: Entity) {
-        val dissolveCmp = entity[Dissolve]
-        dissolveCmp.value = (dissolveCmp.value + dissolveCmp.speed * deltaTime).coerceAtMost(1f)
+    override fun onTickEntity(entity: Entity) = with(entity[Dissolve]) {
+        value = (value + speed * deltaTime).coerceAtMost(1f)
     }
 
 }

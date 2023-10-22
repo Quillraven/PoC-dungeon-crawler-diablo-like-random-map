@@ -24,11 +24,9 @@ class MoveSystem : IteratingSystem(family { all(Move, Boundary).none(Remove) }),
     private var currentMap: DungeonMap? = null
     private val playerEntities = world.family { all(Tags.PLAYER) }
 
-    override fun onTickEntity(entity: Entity) {
-        val moveCmp = entity[Move]
-        val (direction, from, to, alpha) = moveCmp
+    override fun onTickEntity(entity: Entity) = with(entity[Move]) {
         if (alpha == 0f && direction == MoveDirection.NONE) {
-            return
+            return@with
         }
 
         val boundaryCmp = entity[Boundary]
@@ -45,7 +43,7 @@ class MoveSystem : IteratingSystem(family { all(Move, Boundary).none(Remove) }),
                     checkPlayerMovementEnd(entity, boundaryCmp)
                 }
 
-                moveCmp.alpha = 0f
+                alpha = 0f
                 if (direction == MoveDirection.NONE) {
                     // ... and no more direction to go
                     return
@@ -54,12 +52,12 @@ class MoveSystem : IteratingSystem(family { all(Move, Boundary).none(Remove) }),
             }
         }
 
-        moveCmp.alpha = (moveCmp.alpha + deltaTime * 3f).coerceAtMost(1f)
+        alpha = (alpha + deltaTime * 3f).coerceAtMost(1f)
         val (fromX, fromY) = from
         val (toX, toY) = to
         position.set(
-            MathUtils.lerp(fromX, toX, moveCmp.alpha),
-            MathUtils.lerp(fromY, toY, moveCmp.alpha)
+            MathUtils.lerp(fromX, toX, alpha),
+            MathUtils.lerp(fromY, toY, alpha)
         )
     }
 

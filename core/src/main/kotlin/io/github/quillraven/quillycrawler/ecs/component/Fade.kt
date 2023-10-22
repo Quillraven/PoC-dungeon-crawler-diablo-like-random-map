@@ -6,7 +6,7 @@ import com.github.quillraven.fleks.ComponentType
 
 data class Fade(
     val interpolation: Interpolation,
-    val fadeSpeed: Float = 1f,
+    val speed: Float = 1f,
     val from: Float = 0f,
     val to: Float = 1f,
     var alpha: Float = 0f,

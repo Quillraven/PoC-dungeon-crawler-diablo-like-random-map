@@ -17,12 +17,9 @@ class AnimationSystem(private val assets: Assets = inject()) :
 
     private val animationCache = mutableMapOf<String, TextureAnimation>()
 
-    override fun onTickEntity(entity: Entity) {
-        val cmp = entity[Animation]
-        val (textureAnimation, stateTime, speed, loop) = cmp
-
+    override fun onTickEntity(entity: Entity) = with(entity[Animation]) {
         entity[Graphic].sprite.setRegion(textureAnimation.getKeyFrame(stateTime, loop))
-        cmp.stateTime += deltaTime * speed
+        stateTime += deltaTime * speed
     }
 
     fun textureAnimation(atlasKey: String, type: AnimationType, atlasAsset: TextureAtlasAssets): TextureAnimation {

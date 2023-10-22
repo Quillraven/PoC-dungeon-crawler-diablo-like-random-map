@@ -8,9 +8,7 @@ import io.github.quillraven.quillycrawler.ecs.component.Scale
 
 class ScaleSystem : IteratingSystem(family { all(Scale, Graphic) }) {
 
-    override fun onTickEntity(entity: Entity) {
-        val scaleCmp = entity[Scale]
-        val (interpolation, from, scaling, speed, alpha) = scaleCmp
+    override fun onTickEntity(entity: Entity) = with(entity[Scale]) {
         if (alpha >= 1f) {
             entity.configure { it -= Scale }
         }
@@ -20,7 +18,7 @@ class ScaleSystem : IteratingSystem(family { all(Scale, Graphic) }) {
             interpolation.apply(from.y, from.y + scaling.y, alpha)
         )
 
-        scaleCmp.alpha = (alpha + deltaTime * speed).coerceAtMost(1f)
+        alpha = (alpha + deltaTime * speed).coerceAtMost(1f)
     }
 
 }

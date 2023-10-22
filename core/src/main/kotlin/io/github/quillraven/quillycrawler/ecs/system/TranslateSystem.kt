@@ -8,9 +8,7 @@ import io.github.quillraven.quillycrawler.ecs.component.Translate
 
 class TranslateSystem : IteratingSystem(family { all(Translate, Boundary) }) {
 
-    override fun onTickEntity(entity: Entity) {
-        val translateCmp = entity[Translate]
-        val (interpolation, from, translation, speed, alpha) = translateCmp
+    override fun onTickEntity(entity: Entity) = with(entity[Translate]) {
         if (alpha >= 1f) {
             entity.configure { it -= Translate }
         }
@@ -20,7 +18,7 @@ class TranslateSystem : IteratingSystem(family { all(Translate, Boundary) }) {
             interpolation.apply(from.y, from.y + translation.y, alpha)
         )
 
-        translateCmp.alpha = (alpha + deltaTime * speed).coerceAtMost(1f)
+        alpha = (alpha + deltaTime * speed).coerceAtMost(1f)
     }
 
 }
