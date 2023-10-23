@@ -141,8 +141,10 @@ data class DungeonMap(val assetType: TiledMapAssets, val tiledMap: TiledMap) : E
     override fun onEvent(event: Event) {
         when (event) {
             is PlayerCollisionPropEvent -> {
-                propEntities.remove(event.position)
-                propMapObjects.remove(event.propId)
+                if (event.propType.destructible) {
+                    propEntities.remove(event.position)
+                    propMapObjects.remove(event.propId)
+                }
             }
 
             is PlayerCollisionCharacterEvent -> {

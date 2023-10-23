@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.8" tiledversion="1.8.0" orientation="orthogonal" renderorder="right-down" width="10" height="10" tilewidth="16" tileheight="16" infinite="0" nextlayerid="6" nextobjectid="11">
+<map version="1.8" tiledversion="1.8.0" orientation="orthogonal" renderorder="right-down" width="10" height="10" tilewidth="16" tileheight="16" infinite="0" nextlayerid="6" nextobjectid="14">
  <tileset firstgid="1" source="dungeon.tsx"/>
  <tileset firstgid="101" source="props.tsx"/>
- <tileset firstgid="113" source="characters.tsx"/>
+ <tileset firstgid="152" source="characters.tsx"/>
  <layer id="1" name="bgd" width="10" height="10">
   <data encoding="base64" compression="zlib">
    eJxt0LkOwjAQRVGHsCoNkYlAISxFGtYGRMfSxdDw/3/DHelZckFxZL2R7Rk7c871kKOPwZ88RIUZHlhihSfmCKpNscFY+ybo8IJHqX01drjihjcuSe5Ua/EV6z/S2ZjX6mF9s2TukMxdYKGZamW7+44PGp0vlEvlXHu83hJ7V6p5ZVu36tHoX1r9Q9Db7b4T9jjgqHzWP8S65R9Gvwys
@@ -17,11 +17,11 @@
   <object id="10" x="0" y="128" width="16" height="16"/>
  </objectgroup>
  <objectgroup id="2" name="characters">
-  <object id="8" gid="113" x="48" y="96" width="16" height="16"/>
+  <object id="8" gid="152" x="48" y="96" width="16" height="16"/>
  </objectgroup>
  <objectgroup id="3" name="props">
-  <object id="2" gid="102" x="32" y="16" width="16" height="16"/>
-  <object id="3" gid="102" x="112" y="16" width="16" height="16"/>
-  <object id="4" gid="108" x="64" y="144" width="16" height="16"/>
+  <object id="11" gid="123" x="112" y="16" width="16" height="16"/>
+  <object id="12" gid="123" x="32" y="16" width="16" height="16"/>
+  <object id="13" gid="107" x="64" y="144" width="16" height="16"/>
  </objectgroup>
 </map>

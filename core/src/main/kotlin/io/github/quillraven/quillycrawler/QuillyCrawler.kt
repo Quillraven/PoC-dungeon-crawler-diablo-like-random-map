@@ -12,7 +12,7 @@ import ktx.app.KtxGame
 import ktx.app.KtxScreen
 import ktx.assets.disposeSafely
 
-// TODO add more enemies + move pattern (circle, follow walls, mimic player)
+// TODO move pattern (circle, follow walls, mimic player)
 
 class QuillyCrawler : KtxGame<KtxScreen>() {
 

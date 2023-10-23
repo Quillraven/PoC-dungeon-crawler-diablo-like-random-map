@@ -7,6 +7,7 @@ import com.github.quillraven.fleks.Entity
 import com.github.quillraven.fleks.IteratingSystem
 import com.github.quillraven.fleks.World.Companion.family
 import io.github.quillraven.quillycrawler.QuillyCrawler.Companion.UNIT_SCALE
+import io.github.quillraven.quillycrawler.ecs.CharacterType
 import io.github.quillraven.quillycrawler.ecs.PropType
 import io.github.quillraven.quillycrawler.ecs.component.*
 import io.github.quillraven.quillycrawler.ecs.remove
@@ -40,7 +41,7 @@ class MoveSystem : IteratingSystem(family { all(Move, Boundary).none(Remove) }),
                     return
                 } else if (entity has Tags.PLAYER) {
                     // ... and entity is player -> check for char/prop collision
-                    checkPlayerMovementEnd(entity, boundaryCmp)
+                    checkPlayerMovementEnd(entity, position)
                 }
 
                 alpha = 0f
@@ -90,6 +91,21 @@ class MoveSystem : IteratingSystem(family { all(Move, Boundary).none(Remove) }),
             }
         }
 
+        // check if target tile contains non-walkable prop
+        currentMap?.prop(to)?.let { prop ->
+            if (!(prop[Tiled].type as PropType).walkable) {
+                // tile could be blocked by a chest and if the moving entity is a
+                // player then we want to collect it -> trigger checkPlayerMovementEnd
+                if (entity has Tags.PLAYER) {
+                    checkPlayerMovementEnd(entity, to)
+                }
+
+                // prop is blocking tile -> stay at current position
+                to.set(boundary.position)
+                return
+            }
+        }
+
         if (entity has Tags.PLAYER) {
             checkPlayerMovementBegin(entity, boundary, to)
         }
@@ -110,25 +126,50 @@ class MoveSystem : IteratingSystem(family { all(Move, Boundary).none(Remove) }),
         }
     }
 
-    private fun checkPlayerMovementEnd(player: Entity, boundary: Boundary) {
-        currentMap?.character(boundary.position)?.let { character ->
-            val tiledId = character[Tiled].mapObject.id
-            LOG.debug { "Colliding with character $tiledId" }
-            EventDispatcher.dispatch(PlayerCollisionCharacterEvent(player, character, tiledId, boundary.position))
+    private fun checkPlayerMovementEnd(player: Entity, position: Vector2) {
+        currentMap?.character(position)?.let { character ->
+            val (mapObject, type) = character[Tiled]
+            val tiledId = mapObject.id
+            val charType = type as CharacterType
+            LOG.debug { "Colliding with character $charType and id $tiledId" }
+            EventDispatcher.dispatch(PlayerCollisionCharacterEvent(player, character, tiledId, charType, position))
             world.remove(character, dissolveTime = 1.25f, scaleBy = vec2(1f, 1f), scaleTime = 1.5f)
             // TODO trigger combat -> CombatScreen
         }
 
-        currentMap?.prop(boundary.position)?.let { prop ->
-            val tiledId = prop[Tiled].mapObject.id
-            LOG.debug { "Colliding with prop $tiledId" }
-            EventDispatcher.dispatch(PlayerCollisionPropEvent(player, prop, tiledId, boundary.position))
+        currentMap?.prop(position)?.let { prop ->
+            val (mapObject, type) = prop[Tiled]
+            val tiledId = mapObject.id
+            val propType = type as PropType
+            LOG.debug { "Colliding with prop $propType and id $tiledId" }
+            EventDispatcher.dispatch(PlayerCollisionPropEvent(player, prop, tiledId, propType, position))
 
-            when (prop[Tiled].type) {
+            if (propType.destructible) {
+                world.remove(prop, fadeOutTime = 1.25f, translateBy = vec2(0f, 2f), translateTime = 1.75f)
+            }
+
+            when (propType) {
                 PropType.COIN -> {
-                    world.remove(prop, fadeOutTime = 1.25f, translateBy = vec2(0f, 2f), translateTime = 1.75f)
                     prop[Animation].speed = 5f
                     player[Inventory].coins++
+                }
+
+                PropType.KEY1 -> {
+                    prop[Animation].speed = 5f
+                    // TODO add golden key to player
+                }
+
+                PropType.KEY2 -> {
+                    prop[Animation].speed = 5f
+                    // TODO add silver key to player
+                }
+
+                PropType.BOX -> {
+                    // TODO play open animation and add loot
+                }
+
+                PropType.CHEST -> {
+                    // TODO play open animation and add loot
                 }
 
                 else -> Unit

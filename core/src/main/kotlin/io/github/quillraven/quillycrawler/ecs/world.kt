@@ -23,13 +23,21 @@ interface EntityType
 
 enum class CharacterType : EntityType {
     PRIEST,
+    SKELETON1,
+    SKELETON2,
+    VAMPIRE,
     SKULL;
 
     val atlasKey: String = this.name.lowercase()
 }
 
-enum class PropType : EntityType {
-    TORCH,
+enum class PropType(val walkable: Boolean = true, val destructible: Boolean = true) : EntityType {
+    TORCH(destructible = false),
+    FLAG(destructible = false),
+    CHEST(walkable = false, destructible = false),
+    BOX(walkable = false, destructible = false),
+    KEY1,
+    KEY2,
     COIN;
 
     val atlasKey: String = this.name.lowercase()

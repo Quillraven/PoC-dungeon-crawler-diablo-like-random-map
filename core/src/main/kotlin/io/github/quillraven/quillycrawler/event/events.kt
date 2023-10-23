@@ -3,6 +3,8 @@ package io.github.quillraven.quillycrawler.event
 import com.badlogic.gdx.maps.MapObject
 import com.badlogic.gdx.math.Vector2
 import com.github.quillraven.fleks.Entity
+import io.github.quillraven.quillycrawler.ecs.CharacterType
+import io.github.quillraven.quillycrawler.ecs.PropType
 import io.github.quillraven.quillycrawler.map.ConnectionType
 import io.github.quillraven.quillycrawler.map.DungeonMap
 
@@ -29,6 +31,7 @@ data class PlayerCollisionPropEvent(
     val player: Entity,
     val prop: Entity,
     val propId: Int,
+    val propType: PropType,
     val position: Vector2
 ) : Event
 
@@ -36,6 +39,7 @@ data class PlayerCollisionCharacterEvent(
     val player: Entity,
     val character: Entity,
     val charId: Int,
+    val charType: CharacterType,
     val position: Vector2
 ) : Event
 
