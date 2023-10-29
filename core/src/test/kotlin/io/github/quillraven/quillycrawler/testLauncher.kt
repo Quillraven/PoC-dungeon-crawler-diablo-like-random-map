@@ -7,7 +7,8 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration
 
 fun main() {
     // val application = MapTransitionTest()
-    val application = ShaderTest()
+    // val application = ShaderTest()
+    val application = AIMoveTest()
 
     Lwjgl3Application(application, Lwjgl3ApplicationConfiguration().apply {
         setTitle(application::class.java.simpleName)

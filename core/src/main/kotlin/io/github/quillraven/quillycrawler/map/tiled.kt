@@ -10,7 +10,6 @@ import io.github.quillraven.quillycrawler.QuillyCrawler.Companion.UNIT_SCALE
 import ktx.app.gdxError
 import ktx.math.vec2
 import ktx.tiled.*
-import kotlin.math.roundToInt
 
 val TiledMapTile.type: String?
     get() = propertyOrNull("type")
@@ -21,12 +20,6 @@ val MapObject.tileType: String
 
 val MapObject.scaledPosition: Vector2
     get() = vec2(this.x * UNIT_SCALE, this.y * UNIT_SCALE)
-
-// this is used as an index in a map structure of a DungeonMap instance to efficiently retrieve a character/prop
-// by its position. To avoid floating accuracy issues, we make sure to convert it to a proper Int before, since
-// movement is tile based (=Int based calculations).
-val MapObject.scaledIntPosition: Vector2
-    get() = vec2((this.x * UNIT_SCALE).roundToInt().toFloat(), (this.y * UNIT_SCALE).roundToInt().toFloat())
 
 val TiledMap.characters: MapObjects
     get() = this.layers["characters"].objects

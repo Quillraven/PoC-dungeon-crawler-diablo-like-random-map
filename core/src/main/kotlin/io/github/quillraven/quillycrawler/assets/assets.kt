@@ -23,7 +23,8 @@ enum class TiledMapAssets(val path: String) {
     EXIT_0("maps/exit_0.tmx"),
     EXIT_1("maps/exit_1.tmx"),
     TEST("maps/test.tmx"),
-    TEST2("maps/test2.tmx");
+    TEST2("maps/test2.tmx"),
+    TEST_MOVE("maps/move_test.tmx");
 
     val isTest = this.name.startsWith("TEST")
 

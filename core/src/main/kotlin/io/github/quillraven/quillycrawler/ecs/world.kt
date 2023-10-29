@@ -15,7 +15,6 @@ import io.github.quillraven.quillycrawler.ecs.component.*
 import io.github.quillraven.quillycrawler.ecs.system.AnimationSystem
 import io.github.quillraven.quillycrawler.event.EventDispatcher
 import io.github.quillraven.quillycrawler.event.EventListener
-import ktx.app.gdxError
 import ktx.math.vec2
 import kotlin.math.max
 
@@ -80,11 +79,6 @@ fun World.prop(type: PropType, position: Vector2, extraCfg: EntityCreateContext.
 //
 //    animation.textureAnimation = animationSystem.textureAnimation(characterType.atlasKey, animationType)
 //}
-
-fun World.moveTo(entity: Entity, direction: MoveDirection) {
-    val move = entity.getOrNull(Move) ?: gdxError("Entity $entity has no move component")
-    move.direction = direction
-}
 
 fun World.remove(
     entity: Entity,

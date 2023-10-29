@@ -1,9 +1,9 @@
 package io.github.quillraven.quillycrawler.controller
 
 import com.github.quillraven.fleks.World
+import io.github.quillraven.quillycrawler.ecs.component.Move
 import io.github.quillraven.quillycrawler.ecs.component.MoveDirection
 import io.github.quillraven.quillycrawler.ecs.component.Tags
-import io.github.quillraven.quillycrawler.ecs.moveTo
 
 sealed interface ControlAction {
     fun execute()
@@ -11,12 +11,12 @@ sealed interface ControlAction {
 
 data class ControlActionMove(
     val world: World,
-    val direction: MoveDirection,
+    val targetDirection: MoveDirection,
 ) : ControlAction {
 
     private val playerEntities = world.family { all(Tags.PLAYER) }
 
     override fun execute() {
-        playerEntities.forEach { world.moveTo(it, direction) }
+        playerEntities.forEach { it.getOrNull(Move)?.direction = targetDirection }
     }
 }

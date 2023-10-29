@@ -30,6 +30,7 @@ class DungeonScreen(
         }
 
         systems {
+            add(AIMoveSystem())
             add(MoveSystem())
             add(AnimationSystem())
             add(FadeSystem())

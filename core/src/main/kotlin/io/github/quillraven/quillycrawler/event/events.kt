@@ -5,6 +5,7 @@ import com.badlogic.gdx.math.Vector2
 import com.github.quillraven.fleks.Entity
 import io.github.quillraven.quillycrawler.ecs.CharacterType
 import io.github.quillraven.quillycrawler.ecs.PropType
+import io.github.quillraven.quillycrawler.ecs.component.MoveDirection
 import io.github.quillraven.quillycrawler.map.ConnectionType
 import io.github.quillraven.quillycrawler.map.DungeonMap
 
@@ -41,6 +42,11 @@ data class PlayerCollisionCharacterEvent(
     val charId: Int,
     val charType: CharacterType,
     val position: Vector2
+) : Event
+
+data class PlayerMoveEvent(
+    val direction: MoveDirection,
+    val to: Vector2,
 ) : Event
 
 data object EventDispatcher {

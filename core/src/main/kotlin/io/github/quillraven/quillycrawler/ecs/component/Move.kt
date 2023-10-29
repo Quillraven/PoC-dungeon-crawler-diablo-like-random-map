@@ -7,6 +7,12 @@ import ktx.math.vec2
 
 enum class MoveDirection {
     NONE, LEFT, RIGHT, UP, DOWN;
+
+    companion object {
+        private val ALL_DIRECTIONS = listOf(LEFT, RIGHT, UP, DOWN)
+
+        fun random(): MoveDirection = ALL_DIRECTIONS.random()
+    }
 }
 
 data class Move(

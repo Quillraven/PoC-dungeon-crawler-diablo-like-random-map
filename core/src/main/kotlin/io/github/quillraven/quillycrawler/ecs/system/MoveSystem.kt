@@ -23,6 +23,8 @@ import ktx.tiled.*
 class MoveSystem : IteratingSystem(family { all(Move, Boundary).none(Remove) }), EventListener {
 
     private var currentMap: DungeonMap? = null
+    private var mapWidth = 0f
+    private var mapHeight = 0f
     private val playerEntities = world.family { all(Tags.PLAYER) }
 
     override fun onTickEntity(entity: Entity) = with(entity[Move]) {
@@ -42,6 +44,9 @@ class MoveSystem : IteratingSystem(family { all(Move, Boundary).none(Remove) }),
                 } else if (entity has Tags.PLAYER) {
                     // ... and entity is player -> check for char/prop collision
                     checkPlayerMovementEnd(entity, position)
+                } else {
+                    // ... other entities stop their movement after one tile
+                    direction = MoveDirection.NONE
                 }
 
                 alpha = 0f
@@ -61,6 +66,8 @@ class MoveSystem : IteratingSystem(family { all(Move, Boundary).none(Remove) }),
             MathUtils.lerp(fromY, toY, alpha)
         )
     }
+
+    private fun Vector2.isWithinMap(): Boolean = x in 0f..<mapWidth && y in 0f..<mapHeight
 
     private fun updateTarget(
         entity: Entity,
@@ -107,15 +114,30 @@ class MoveSystem : IteratingSystem(family { all(Move, Boundary).none(Remove) }),
         }
 
         if (entity has Tags.PLAYER) {
+            EventDispatcher.dispatch(PlayerMoveEvent(direction, to))
             checkPlayerMovementBegin(entity, boundary, to)
+            return
         }
+
+        // restrict other character movement within map
+        if (!to.isWithinMap()) {
+            to.set(boundary.position)
+            return
+        }
+
+        // check if there is already a character on the target tile (=char <-> char collision)
+        if (currentMap?.character(to) != null) {
+            to.set(boundary.position)
+            return
+        }
+
+        // update entity location in DungeonMap
+        currentMap?.moveCharacter(from, to)
     }
 
     private fun checkPlayerMovementBegin(player: Entity, boundary: Boundary, to: Vector2) {
         val scaledPlayerCenter = boundary.center(TMP_CENTER).div(UNIT_SCALE)
-        val mapWidth = currentMap?.tiledMap?.width?.toFloat() ?: 0f
-        val mapHeight = currentMap?.tiledMap?.height?.toFloat() ?: 0f
-        if (to.x in 0f..<mapWidth && to.y in 0f..<mapHeight) {
+        if (to.isWithinMap()) {
             // player is not leaving map
             return
         }
@@ -181,6 +203,8 @@ class MoveSystem : IteratingSystem(family { all(Move, Boundary).none(Remove) }),
         when (event) {
             is MapLoadEvent -> {
                 currentMap = event.dungeonMap
+                mapWidth = event.dungeonMap.tiledMap.width.toFloat()
+                mapHeight = event.dungeonMap.tiledMap.height.toFloat()
             }
 
             is MapTransitionStartEvent -> playerEntities.forEach { player -> player.configure { it += Tags.ROOT } }
