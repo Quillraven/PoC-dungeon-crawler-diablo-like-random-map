@@ -16,7 +16,6 @@ import io.github.quillraven.quillycrawler.ecs.component.Tiled
 import io.github.quillraven.quillycrawler.event.*
 import ktx.app.gdxError
 import ktx.log.logger
-import ktx.math.vec2
 import ktx.tiled.id
 import ktx.tiled.shape
 import ktx.tiled.totalWidth
@@ -38,10 +37,20 @@ data class DungeonMap(val assetType: TiledMapAssets, val tiledMap: TiledMap) : E
 
     private val toMapConnections = mutableMapOf<MapObject, DungeonMap>()
     private val connections: MapObjects = tiledMap.connections
-    private val charMapObjects = tiledMap.characters.filter { it.tileType != "Player" }.associateBy { it.id }.toMutableMap()
+
+    // map of character ID (=Tiled ID) to MapObject
+    private val charMapObjects = tiledMap.nonPlayerCharacters.associateBy { it.id }.toMutableMap()
+
+    // map of prop ID (=Tiled ID) to MapObject
     private val propMapObjects = tiledMap.props.associateBy { it.id }.toMutableMap()
+
+    // map of character position to character entity
     private val charEntities = mutableMapOf<Vector2, Entity>()
+
+    // map of prop position to prop entity
     private val propEntities = mutableMapOf<Vector2, Entity>()
+
+    // player start location; can be null if map is not a start map
     val startPosition: Vector2? = tiledMap.playerStart?.scaledPosition
 
     fun character(at: Vector2): Entity? = charEntities[at]
@@ -50,28 +59,29 @@ data class DungeonMap(val assetType: TiledMapAssets, val tiledMap: TiledMap) : E
 
     fun connection(at: Vector2): MapObject? = connections.firstOrNull { at in it.shape }
 
-
-    // this is used as an index in a map structure of a DungeonMap instance to efficiently retrieve a character/prop
-    // by its position. To avoid floating accuracy issues, we make sure to convert it to a proper Int before, since
-    // movement is tile based (=Int based calculations).
-    private fun Vector2.roundToInt(): Vector2 = vec2(x.roundToInt().toFloat(), y.roundToInt().toFloat())
+    private fun Vector2.roundToInt(): Vector2 {
+        x = x.roundToInt().toFloat()
+        y = y.roundToInt().toFloat()
+        return this
+    }
 
     fun spawnCharacters(world: World, fadeIn: Boolean = false) {
         // TODO correctly restore last position of character
         charEntities.clear()
         charMapObjects.values.forEach { mapObject ->
             val charType = CharacterType.valueOf(mapObject.tileType.uppercase())
-            val mapObjPosition = mapObject.scaledPosition
-            val entity = world.character(charType, mapObjPosition) {
-                it += Tiled(mapObject, charType)
+            val mapObjPosition = mapObject.scaledPosition.roundToInt()
+            world.character(charType, mapObjPosition) {
+                val tiledPosition = mapObjPosition.cpy()
+                it += Tiled(mapObject, charType, tiledPosition)
+                charEntities[tiledPosition] = it
                 if (fadeIn) {
                     it[Graphic].sprite.setAlpha(0f)
                     it += Fade(Interpolation.fade, 0.75f)
                 }
 
-                configureEntity(it, charType)
+                configureCharacter(it, charType)
             }
-            charEntities[mapObjPosition.roundToInt()] = entity
         }
     }
 
@@ -79,15 +89,16 @@ data class DungeonMap(val assetType: TiledMapAssets, val tiledMap: TiledMap) : E
         propEntities.clear()
         propMapObjects.values.forEach { mapObject ->
             val propType = PropType.valueOf(mapObject.tileType.uppercase())
-            val mapObjPosition = mapObject.scaledPosition
-            val entity = world.prop(propType, mapObjPosition) {
-                it += Tiled(mapObject, propType)
+            val mapObjPosition = mapObject.scaledPosition.roundToInt()
+            world.prop(propType, mapObjPosition) {
+                val tiledPosition = mapObjPosition.cpy()
+                it += Tiled(mapObject, propType, tiledPosition)
+                propEntities[tiledPosition] = it
                 if (fadeIn) {
                     it[Graphic].sprite.setAlpha(0f)
                     it += Fade(Interpolation.fade, 0.75f)
                 }
             }
-            propEntities[mapObjPosition.roundToInt()] = entity
         }
     }
 
@@ -165,17 +176,18 @@ data class DungeonMap(val assetType: TiledMapAssets, val tiledMap: TiledMap) : E
         }
     }
 
-    fun moveCharacter(from: Vector2, to: Vector2) {
+    fun moveCharacter(tiledPosition: Vector2, to: Vector2) {
         if (charEntities[to] != null) {
             gdxError("There is already a character at $to: ${charEntities[to]}")
         }
 
-        val charEntity = charEntities.remove(from) ?: gdxError("There is no entity at $from")
-        LOG.debug { "Move character $charEntity from $from to $to" }
-        // it is important to create a new Vector2 instance for the key because if we just use the 'to' instance
-        // then we get a wrong behavior since that instance gets modified further in the MoveSystem which results
-        // in an updating key. However, we want a fixed key that refers to a tile based index -> new Vector2 instance.
-        charEntities[to.roundToInt()] = charEntity
+        val charEntity = charEntities.remove(tiledPosition) ?: gdxError("There is no entity at $tiledPosition")
+        LOG.debug { "Move character $charEntity from $tiledPosition to $to" }
+        // update tiledPosition of Tiled component and insert entity again into map to store it with
+        // correct hashCode. Just modifying the tiledPosition Vector2 is not sufficient because this won't
+        // update the map correctly.
+        tiledPosition.set(to).roundToInt()
+        charEntities[tiledPosition] = charEntity
     }
 
     companion object {

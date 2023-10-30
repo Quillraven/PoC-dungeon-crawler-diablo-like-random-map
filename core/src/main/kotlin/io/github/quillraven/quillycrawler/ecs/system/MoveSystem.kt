@@ -132,7 +132,7 @@ class MoveSystem : IteratingSystem(family { all(Move, Boundary).none(Remove) }),
         }
 
         // update entity location in DungeonMap
-        currentMap?.moveCharacter(from, to)
+        currentMap?.moveCharacter(entity[Tiled].tiledPosition, to)
     }
 
     private fun checkPlayerMovementBegin(player: Entity, boundary: Boundary, to: Vector2) {

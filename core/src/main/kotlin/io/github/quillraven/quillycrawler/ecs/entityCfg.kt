@@ -8,7 +8,7 @@ import ktx.log.Logger
 
 private val LOG = Logger("EntityCfg")
 
-fun EntityCreateContext.configureEntity(entity: Entity, characterType: CharacterType) = when (characterType) {
+fun EntityCreateContext.configureCharacter(entity: Entity, characterType: CharacterType) = when (characterType) {
     CharacterType.SKULL -> entity += AIMove(AIMoveType.RANDOM)
     CharacterType.VAMPIRE -> entity += AIMove(AIMoveType.CIRCLE)
     CharacterType.SKELETON1 -> entity += AIMove(AIMoveType.LINE)

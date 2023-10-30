@@ -61,6 +61,8 @@ data object EventDispatcher {
     }
 
     fun dispatch(event: Event) {
+        // TODO refactor this again later. Use normal forEach iteration and check again why it crashes
+        //  during a map transition
         // use index iteration instead of forEach to avoid
         // ConcurrentModification when adding/removing listeners during iteration
         for (i in 0 until listeners.size) {

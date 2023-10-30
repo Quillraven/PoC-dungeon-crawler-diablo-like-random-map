@@ -24,6 +24,9 @@ val MapObject.scaledPosition: Vector2
 val TiledMap.characters: MapObjects
     get() = this.layers["characters"].objects
 
+val TiledMap.nonPlayerCharacters: List<MapObject>
+    get() = this.layers["characters"].objects.filter { it.tileType != "Player" }
+
 val TiledMap.playerStart: MapObject?
     get() = this.layers["characters"].objects.firstOrNull { it.tileType == "Player" }
 
