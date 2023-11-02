@@ -12,8 +12,6 @@ import ktx.app.KtxGame
 import ktx.app.KtxScreen
 import ktx.assets.disposeSafely
 
-// TODO move pattern (circle, follow walls, mimic player)
-
 class QuillyCrawler : KtxGame<KtxScreen>() {
 
     private val batch: Batch by lazy { SpriteBatch() }
