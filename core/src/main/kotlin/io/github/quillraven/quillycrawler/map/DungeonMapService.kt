@@ -46,7 +46,7 @@ class DungeonMapService(private val world: World, private val assets: Assets) : 
             world.character(CharacterType.PRIEST, startLoc) {
                 it += Tags.PLAYER
                 it += Tags.CAMERA_LOCK
-                it += Inventory(coins = 0)
+                it += Inventory()
             }
         } else {
             // relocate player
