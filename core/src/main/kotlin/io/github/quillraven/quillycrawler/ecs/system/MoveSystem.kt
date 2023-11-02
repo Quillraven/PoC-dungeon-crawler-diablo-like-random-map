@@ -178,20 +178,20 @@ class MoveSystem : IteratingSystem(family { all(Move, Boundary).none(Remove) }),
 
                 PropType.KEY1 -> {
                     prop[Animation].speed = 5f
-                    // TODO add golden key to player
+                    player[Inventory].goldenKeys++
                 }
 
                 PropType.KEY2 -> {
                     prop[Animation].speed = 5f
-                    // TODO add silver key to player
+                    player[Inventory].silverKeys++
                 }
 
                 PropType.BOX -> {
-                    // TODO play open animation and add loot
+                    // TODO play open animation and add loot (small)
                 }
 
                 PropType.CHEST -> {
-                    // TODO play open animation and add loot
+                    // TODO play open animation and add loot (big)
                 }
 
                 else -> Unit
