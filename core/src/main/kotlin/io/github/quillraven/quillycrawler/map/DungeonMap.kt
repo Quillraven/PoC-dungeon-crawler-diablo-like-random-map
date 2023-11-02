@@ -40,15 +40,16 @@ data class DungeonMap(val assetType: TiledMapAssets, val tiledMap: TiledMap) : E
 
     // map of character ID (=Tiled ID) to MapObject
     private val charMapObjects = tiledMap.nonPlayerCharacters.associateBy { it.id }.toMutableMap()
-
-    // map of prop ID (=Tiled ID) to MapObject
-    private val propMapObjects = tiledMap.props.associateBy { it.id }.toMutableMap()
-
     // map of character position to character entity
     private val charEntities = mutableMapOf<Vector2, Entity>()
 
+    // map of prop ID (=Tiled ID) to MapObject
+    private val propMapObjects = tiledMap.props.associateBy { it.id }.toMutableMap()
     // map of prop position to prop entity
     private val propEntities = mutableMapOf<Vector2, Entity>()
+
+    // map of Tiled ID to position (used for spawning/despawning when map gets loaded/unloaded)
+    private val entityPositions = mutableMapOf<Int, Vector2>()
 
     // player start location; can be null if map is not a start map
     val startPosition: Vector2? = tiledMap.playerStart?.scaledPosition
@@ -66,11 +67,10 @@ data class DungeonMap(val assetType: TiledMapAssets, val tiledMap: TiledMap) : E
     }
 
     fun spawnCharacters(world: World, fadeIn: Boolean = false) {
-        // TODO correctly restore last position of character
         charEntities.clear()
         charMapObjects.values.forEach { mapObject ->
             val charType = CharacterType.valueOf(mapObject.tileType.uppercase())
-            val mapObjPosition = mapObject.scaledPosition.roundToInt()
+            val mapObjPosition = entityPositions[mapObject.id] ?: mapObject.scaledPosition.roundToInt()
             world.character(charType, mapObjPosition) {
                 val tiledPosition = mapObjPosition.cpy()
                 it += Tiled(mapObject, charType, tiledPosition)
@@ -89,7 +89,7 @@ data class DungeonMap(val assetType: TiledMapAssets, val tiledMap: TiledMap) : E
         propEntities.clear()
         propMapObjects.values.forEach { mapObject ->
             val propType = PropType.valueOf(mapObject.tileType.uppercase())
-            val mapObjPosition = mapObject.scaledPosition.roundToInt()
+            val mapObjPosition = entityPositions[mapObject.id] ?: mapObject.scaledPosition.roundToInt()
             world.prop(propType, mapObjPosition) {
                 val tiledPosition = mapObjPosition.cpy()
                 it += Tiled(mapObject, propType, tiledPosition)
@@ -164,12 +164,14 @@ data class DungeonMap(val assetType: TiledMapAssets, val tiledMap: TiledMap) : E
                 if (event.propType.destructible) {
                     propEntities.remove(event.position)
                     propMapObjects.remove(event.propId)
+                    entityPositions.remove(event.propId)
                 }
             }
 
             is PlayerCollisionCharacterEvent -> {
                 charEntities.remove(event.position)
                 charMapObjects.remove(event.charId)
+                entityPositions.remove(event.charId)
             }
 
             else -> Unit
@@ -188,6 +190,20 @@ data class DungeonMap(val assetType: TiledMapAssets, val tiledMap: TiledMap) : E
         // update the map correctly.
         tiledPosition.set(to).roundToInt()
         charEntities[tiledPosition] = charEntity
+    }
+
+    fun despawnProps(world: World) = with(world) {
+        propEntities.forEach { (pos, entity) ->
+            entityPositions[entity[Tiled].mapObject.id] = pos.cpy()
+            entity.remove()
+        }
+    }
+
+    fun despawnCharacters(world: World) = with(world) {
+        charEntities.forEach { (pos, entity) ->
+            entityPositions[entity[Tiled].mapObject.id] = pos.cpy()
+            entity.remove()
+        }
     }
 
     companion object {

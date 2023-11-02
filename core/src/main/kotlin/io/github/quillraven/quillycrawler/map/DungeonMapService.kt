@@ -78,7 +78,8 @@ class DungeonMapService(private val world: World, private val assets: Assets) : 
                 }
 
                 // remove any tiled entity of the current map ...
-                tiledEntities.forEach { it.remove() }
+                activeMap.despawnProps(world)
+                activeMap.despawnCharacters(world)
 
                 // ... change event listening to new map ...
                 EventDispatcher.deRegister(activeMap)
